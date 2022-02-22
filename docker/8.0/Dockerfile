@@ -223,6 +223,18 @@ RUN --mount=type=cache,target=/var/cache/apt \
         mv overmind /usr/local/bin/; \
     }; \
     # ---
+    # RoadRunner
+    { \
+        export \
+            ROADRUNNER_VERSION=2.8.5 \
+            ROADRUNNER_SHA256=786ef01528faeac5d6d5ae2e1f4b7814da990b90cec302cb347675d5def95aff; \
+        curl --fail -Lo roadrunner.tar.gz https://github.com/roadrunner-server/roadrunner/releases/download/v${ROADRUNNER_VERSION}/roadrunner-${ROADRUNNER_VERSION}-linux-amd64.tar.gz; \
+        echo "${ROADRUNNER_SHA256} *roadrunner.tar.gz" | sha256sum -c - >/dev/null 2>&1; \
+        tar -xf roadrunner.tar.gz; \
+        mv roadrunner-${ROADRUNNER_VERSION}-linux-amd64/rr /usr/local/bin/; \
+        rm -rf roadrunner.tar.gz roadrunner-${ROADRUNNER_VERSION}-*; \
+    }; \
+    # ---
     # Watchexec
     { \
         export \
@@ -237,7 +249,9 @@ RUN --mount=type=cache,target=/var/cache/apt \
     # smoke tests
     [ "$(command -v composer)" = '/usr/local/bin/composer' ]; \
     [ "$(command -v overmind)" = '/usr/local/bin/overmind' ]; \
+    [ "$(command -v rr)" = '/usr/local/bin/rr' ]; \
     [ "$(command -v watchexec)" = '/usr/local/bin/watchexec' ]; \
     composer --version; \
+    rr --version; \
     overmind --version; \
     watchexec --version
