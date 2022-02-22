@@ -5,7 +5,7 @@ command:
     exit-status: 0
 
   php-installed-modules:
-    exec: "php -m"
+    exec: "php --modules"
     exit-status: 0
     stdout:
       - "/bcmath/"
@@ -25,6 +25,7 @@ command:
       - "/pdo_mysql/"
       - "/pdo_pgsql/"
       - "/redis/"
+      - "/sockets/"
       - "/tokenizer/"
       - "/xml/"
       - "/xsl/"
@@ -42,6 +43,10 @@ command:
 
   nodejs-installed:
     exec: "node --version"
+    exit-status: 0
+
+  roadrunner-installed:
+    exec: "rr --version"
     exit-status: 0
 
   yarn-installed:
