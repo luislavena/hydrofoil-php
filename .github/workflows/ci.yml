@@ -17,6 +17,7 @@ jobs:
       matrix:
         include:
           - { php_major_minor: "8.0", php_full_version: "8.0.17" }
+          - { php_major_minor: "7.4", php_full_version: "7.4.28" }
 
     name: >-
       PHP ${{ matrix.php_full_version }}
