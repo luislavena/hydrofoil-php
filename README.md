@@ -3,7 +3,7 @@
 
 ## Features
 
-* Use Debian as base for dev/prod environment parity (following [Twelve-Factor App](https://12factor.net/dev-prod-parity))
+* Use Debian as base for dev/prod environment parity (following [Twelve-Factor App][twelve-factor-app])
 * Use Docker's official PHP images
 * Promote non-root container usage and proper file/directory ownership
 * Provide simple tools to certain dev related tasks (Eg. watch changes, process monitoring, etc)
@@ -11,7 +11,7 @@
 
 This project does **not** aim to:
 
-* Be compatible with [Visual Studio Code devcontainer](devcontainer), [GitHub Codespaces](codespaces) or similar
+* Be compatible with [Visual Studio Code devcontainer][devcontainer], [GitHub Codespaces][codespaces] or similar
 * Be _everything but the kitchen sink_
 
 ## Overview
@@ -21,7 +21,7 @@ installation of tools for something consistent across OS and configurations.
 
 It includes a base set of PHP extensions for development of average web 
 applications, specially for using frameworks like Laravel and
-[Twill CMS](https://twill.io), leaving to you the option to add additional
+[Twill CMS][twill-cms], leaving to you the option to add additional
 ones by using the offered image as base.
 
 To be a functional image, it includes the following packages:
@@ -38,15 +38,15 @@ Additionally, it includes the following packages:
 
 ## Requirements
 
-The container images can be used directly with [Docker](docker), but is
-recommended to use in combination with [docker-compose](docker-compose).
+The container images can be used directly with [Docker][docker], but is
+recommended to use in combination with [docker-compose][docker-compose].
 
 See below for usage examples.
 
 ## Usage
 
 To take full advantage of this container image, you need to adjust your
-[`docker-compose.yml`](docker-compose-yml) primary service to use it:
+[`docker-compose.yml`][docker-compose-yml] primary service to use it:
 
 ```yaml
 services:
@@ -84,7 +84,7 @@ user: ${FIXUID:-1000}:${FIXGID:-1000}
 
 This sets the user that will be used within the container to something other
 than `root`. A sudoers `user` has been setup and this instructions uses
-Docker's compose [variable substitution](variable-substitution) to read your
+Docker's compose [variable substitution][variable-substitution] to read your
 current user's UID/GID values and map correctly to the container user.
 
 This technique helps eliminate root/non-root permission issues when working
@@ -110,17 +110,19 @@ with `working_dir` makes it the working directory for all operations.
 ### Other examples
 
 For a complete example on how this is being used, check out the
-[Laravel + Twill](laravel-twill) repository.
+[Laravel + Twill][laravel-twill] template repository.
 
 ## Contribution Policy
 
 This project is open to code contributions for bug fixes only. Features carry
 a long-term maintenance burden so they will not be accepted at this time.
-Please [submit an issue](new-issue) if you have a feature you'd like to
+Please [submit an issue][new-issue] if you have a feature you'd like to
 request or discuss.
 
+[twelve-factor-app]: https://12factor.net/dev-prod-parity
 [devcontainer]: https://code.visualstudio.com/docs/remote/containers
 [codespaces]: https://github.com/features/codespaces
+[twill-cms]: https://twill.io
 [new-issue]: https://github.com/luislavena/hydrofoil-php/issues/new
 [docker]: https://docs.docker.com/get-docker/
 [docker-compose]: https://docs.docker.com/compose/
