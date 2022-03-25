@@ -5,10 +5,11 @@ command:
     exit-status: 0
 
   php-installed-modules:
-    exec: "php -m"
+    exec: "php --modules"
     exit-status: 0
     stdout:
       - "/bcmath/"
+      - "/blackfire/"
       - "/calendar/"
       - "/ctype/"
       - "/exif/"
@@ -26,6 +27,7 @@ command:
       - "/pdo_pgsql/"
       - "/redis/"
       - "/tokenizer/"
+      - "/xdebug/"
       - "/xml/"
       - "/xsl/"
       - "/zip/"

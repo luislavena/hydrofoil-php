@@ -117,6 +117,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     # (no need to install mbstring, pdo, tokenizer or xml as they are already part of base image)
     ./install-php-extensions \
       bcmath \
+      blackfire \
       calendar \
       exif \
       gd \
@@ -127,6 +128,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
       pdo_pgsql \
       redis-stable \
       sockets \
+      xdebug-stable \
       xsl \
       zip \
     ; \
