@@ -2,7 +2,7 @@
 
 # ---
 # 1. Use Debian 11 (bullseye) version of PHP
-FROM php:8.0.17-cli-bullseye AS base
+FROM php:8.0.18-cli-bullseye AS base
 
 # ---
 # 2. Upgrade system and installed dependencies for security patches
