@@ -61,7 +61,7 @@ jobs:
           tag-prefix: php-${{ matrix.php_major_minor }}--
 
       - name: Build Docker images
-        uses: docker/build-push-action@v2.7.0
+        uses: docker/build-push-action@v3.0.0
         with:
           context: docker/${{ matrix.php_major_minor }}
           tags: local-image:ci
@@ -83,7 +83,7 @@ jobs:
           GOSS_FILE: docker/${{ matrix.php_major_minor }}/goss.yaml
 
       - name: Push Docker images
-        uses: docker/build-push-action@v2.7.0
+        uses: docker/build-push-action@v3.0.0
         with:
           context: docker/${{ matrix.php_major_minor }}
           tags: ${{ steps.meta.outputs.tags }}
