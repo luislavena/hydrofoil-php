@@ -192,6 +192,15 @@ RUN --mount=type=cache,target=/var/cache/apt \
     set -eux; \
     cd /tmp; \
     # ---
+    # Database clients (PostgreSQL, MariaDB/MySQL)
+    { \
+        apt-get update; \
+        apt-get install --no-install-recommends -y \
+            mariadb-client \
+            postgresql-client \
+        ; \
+    }; \
+    # ---
     # Composer (needs 7z, unzip)
     { \
         apt-get update; \

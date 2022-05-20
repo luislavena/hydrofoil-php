@@ -50,6 +50,22 @@ command:
     exec: "yarn --version"
     exit-status: 0
 
+  mysql-installed:
+    exec: "mysql --version"
+    exit-status: 0
+
+  mysqldump-installed:
+    exec: "mysqldump --version"
+    exit-status: 0
+
+  pg_dump-installed:
+    exec: "pg_dump --version"
+    exit-status: 0
+
+  pg_restore-installed:
+    exec: "pg_restore --version"
+    exit-status: 0
+
 file:
   /usr/local/bin/fixuid:
     exists: true
