@@ -124,6 +124,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
       pdo_mysql \
       pdo_pgsql \
       redis-stable \
+      sockets \
       xdebug-stable \
       xsl \
       zip \
