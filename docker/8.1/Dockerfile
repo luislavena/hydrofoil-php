@@ -226,8 +226,8 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
             tmux \
         ; \
         export \
-            OVERMIND_VERSION=2.2.2 \
-            OVERMIND_SHA256=2373737110da98f50d7f1c5b05e23d4d65b8f519ca885f7fe169f83ff0f6f61e; \
+            OVERMIND_VERSION=2.3.0 \
+            OVERMIND_SHA256=d6a715c0810ceb39c94bf61843befebe04a83a0469b53d6af0a52e2fea4e2ab3; \
         curl --fail -Lo overmind.gz https://github.com/DarthSim/overmind/releases/download/v${OVERMIND_VERSION}/overmind-v${OVERMIND_VERSION}-linux-amd64.gz; \
         echo "${OVERMIND_SHA256} *overmind.gz" | sha256sum -c - >/dev/null 2>&1; \
         gunzip overmind.gz; \
