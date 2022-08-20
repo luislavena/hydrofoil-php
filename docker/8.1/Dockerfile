@@ -16,6 +16,10 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     apt-get upgrade -y
 
 # ---
+# Expose BuildKit's target architecture to the Dockerfile (Eg. amd64, arm64)
+ARG TARGETARCH
+
+# ---
 # 3. Setup non-root user (fixuid)
 #
 # TODO: detect arch other than x86_64
@@ -47,9 +51,23 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     # Install fixuid
     { \
         cd /tmp; \
-        export FIXUID_VERSION=0.5.1 \
-            FIXUID_SHA256=1077e7af13596e6e3902230d7260290fe21b2ee4fffcea1eb548e5c465a34800; \
-        curl --fail -Lo fixuid.tar.gz https://github.com/boxboat/fixuid/releases/download/v${FIXUID_VERSION}/fixuid-${FIXUID_VERSION}-linux-amd64.tar.gz; \
+        export \
+            FIXUID_VERSION=0.5.1 \
+            ARCH_PREFIX=${TARGETARCH} \
+        ; \
+        case $TARGETARCH in \
+        amd64) \
+            export FIXUID_SHA256=1077e7af13596e6e3902230d7260290fe21b2ee4fffcea1eb548e5c465a34800 \
+            ;; \
+        arm64) \
+            export FIXUID_SHA256=7993a03876f5151c450e68a49706ef4c80d6b0ab755679eb47282df7f162fd82 \
+            ;; \
+        *) \
+            echo "Unsupported architecture: '$TARGETARCH'"; \
+            exit 1 \
+            ;; \
+        esac; \
+        curl --fail -Lo fixuid.tar.gz https://github.com/boxboat/fixuid/releases/download/v${FIXUID_VERSION}/fixuid-${FIXUID_VERSION}-linux-${ARCH_PREFIX}.tar.gz; \
         echo "${FIXUID_SHA256} *fixuid.tar.gz" | sha256sum -c - >/dev/null 2>&1; \
         tar -xf fixuid.tar.gz; \
         mv fixuid /usr/local/bin/; \
@@ -159,9 +177,21 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
       export \
         NODEJS_MAJOR=16 \
         NODEJS_VERSION=16.17.0 \
-        NODEJS_SHA256=de6e77a584a35b1086d47befcc7f26869004b7b1acd0619c78e590f7e600f73f \
+        ARCH_PREFIX=${TARGETARCH} \
       ; \
-      curl --fail -Lo nodejs.deb https://deb.nodesource.com/node_${NODEJS_MAJOR}.x/pool/main/n/nodejs/nodejs_${NODEJS_VERSION}-deb-1nodesource1_amd64.deb; \
+      case $TARGETARCH in \
+      amd64) \
+          export NODEJS_SHA256=de6e77a584a35b1086d47befcc7f26869004b7b1acd0619c78e590f7e600f73f \
+          ;; \
+      arm64) \
+          export NODEJS_SHA256=25479bd3fe52d8ff9810d0ae65c42277a0555663fe0365213f051e695707a008 \
+          ;; \
+      *) \
+          echo "Unsupported architecture: '$TARGETARCH'"; \
+          exit 1 \
+          ;; \
+      esac; \
+      curl --fail -Lo nodejs.deb https://deb.nodesource.com/node_${NODEJS_MAJOR}.x/pool/main/n/nodejs/nodejs_${NODEJS_VERSION}-deb-1nodesource1_${ARCH_PREFIX}.deb; \
       echo "${NODEJS_SHA256} *nodejs.deb" | sha256sum -c - >/dev/null 2>&1; \
       dpkg --install nodejs.deb; \
       rm -f nodejs.deb; \
@@ -227,8 +257,21 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
         ; \
         export \
             OVERMIND_VERSION=2.3.0 \
-            OVERMIND_SHA256=d6a715c0810ceb39c94bf61843befebe04a83a0469b53d6af0a52e2fea4e2ab3; \
-        curl --fail -Lo overmind.gz https://github.com/DarthSim/overmind/releases/download/v${OVERMIND_VERSION}/overmind-v${OVERMIND_VERSION}-linux-amd64.gz; \
+            ARCH_PREFIX=${TARGETARCH} \
+        ; \
+        case $TARGETARCH in \
+        amd64) \
+            export OVERMIND_SHA256=d6a715c0810ceb39c94bf61843befebe04a83a0469b53d6af0a52e2fea4e2ab3 \
+            ;; \
+        arm64) \
+            export OVERMIND_SHA256=ac6bed32200963977e9e14e2b5228c3b1ecd25be3279bfa41c44cdbf555f1217 \
+            ;; \
+        *) \
+            echo "Unsupported architecture: '$TARGETARCH'"; \
+            exit 1 \
+            ;; \
+        esac; \
+        curl --fail -Lo overmind.gz https://github.com/DarthSim/overmind/releases/download/v${OVERMIND_VERSION}/overmind-v${OVERMIND_VERSION}-linux-${ARCH_PREFIX}.gz; \
         echo "${OVERMIND_SHA256} *overmind.gz" | sha256sum -c - >/dev/null 2>&1; \
         gunzip overmind.gz; \
         chmod +x overmind; \
@@ -239,12 +282,28 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     { \
         export \
             WATCHEXEC_VERSION=1.20.5 \
-            WATCHEXEC_SHA256=33e091870736833b77b103a8e7268c0ae66d756b8d71203405353eb9d40774f2; \
-        curl --fail -Lo watchexec.tar.xz https://github.com/watchexec/watchexec/releases/download/cli-v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-musl.tar.xz; \
+        ; \
+        case $TARGETARCH in \
+        amd64) \
+            export \
+              ARCH_PREFIX=x86_64 \
+              WATCHEXEC_SHA256=33e091870736833b77b103a8e7268c0ae66d756b8d71203405353eb9d40774f2 \
+            ;; \
+        arm64) \
+            export \
+              ARCH_PREFIX=aarch64 \
+              WATCHEXEC_SHA256=8598eac8099e7b8df2237317b56d216c236742f37b684a91ec630fdc695da6d8 \
+            ;; \
+        *) \
+            echo "Unsupported architecture: '$TARGETARCH'"; \
+            exit 1 \
+            ;; \
+        esac; \
+        curl --fail -Lo watchexec.tar.xz https://github.com/watchexec/watchexec/releases/download/cli-v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-${ARCH_PREFIX}-unknown-linux-musl.tar.xz; \
         echo "${WATCHEXEC_SHA256} *watchexec.tar.xz" | sha256sum -c - >/dev/null 2>&1; \
         tar -xf watchexec.tar.xz; \
-        mv watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-musl/watchexec /usr/local/bin/; \
-        rm -rf watchexec.tar.xz watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-musl; \
+        mv watchexec-${WATCHEXEC_VERSION}-${ARCH_PREFIX}-unknown-linux-musl/watchexec /usr/local/bin/; \
+        rm -rf watchexec.tar.xz watchexec-${WATCHEXEC_VERSION}-${ARCH_PREFIX}-unknown-linux-musl; \
     }; \
     # smoke tests
     [ "$(command -v composer)" = '/usr/local/bin/composer' ]; \
