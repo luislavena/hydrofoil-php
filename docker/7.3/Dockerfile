@@ -208,8 +208,8 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
             unzip \
         ; \
         export \
-            COMPOSER_VERSION=1.10.25 \
-            COMPOSER_SHA256=6b089bd8b78b00c3c15d7b13353fbcbdf16a3f5248203c9a3e76f13948f2de92; \
+            COMPOSER_VERSION=1.10.26 \
+            COMPOSER_SHA256=cbfe1f85276c57abe464d934503d935aa213494ac286275c8dfabfa91e3dbdc4; \
         curl --fail -Lo composer.phar https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar; \
         echo "${COMPOSER_SHA256} *composer.phar" | sha256sum -c - >/dev/null 2>&1; \
         chmod +x composer.phar; \
