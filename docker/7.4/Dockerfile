@@ -168,8 +168,8 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     # Yarn
     { \
       export \
-        YARN_VERSION=1.22.18 \
-        YARN_SHA256=5eb05c028dddf449debb1d3d5457c59acd3c208003753c5ab000cf052692b8e0 \
+        YARN_VERSION=1.22.19 \
+        YARN_SHA256=666cc8c015bb9e36236fc355816711fbc88bbba97ce8344d3ea2a36debcf7424 \
       ; \
       curl --fail -Lo yarn.deb https://github.com/yarnpkg/yarn/releases/download/v${YARN_VERSION}/yarn_${YARN_VERSION}_all.deb; \
       echo "${YARN_SHA256} *yarn.deb" | sha256sum -c - >/dev/null 2>&1; \
