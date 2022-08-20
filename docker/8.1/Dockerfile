@@ -8,8 +8,8 @@ FROM php:8.1.9-cli-bullseye AS base
 # 2. Upgrade system and installed dependencies for security patches
 #
 # Also enable to keep copies of downloaded packages for faster rebuilds
-RUN --mount=type=cache,target=/var/cache/apt \
-    --mount=type=cache,target=/var/lib/apt \
+RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
+    --mount=type=cache,sharing=private,target=/var/lib/apt \
     --mount=type=tmpfs,target=/var/log \
     set -eux; \
     apt-get update; \
@@ -19,8 +19,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
 # 3. Setup non-root user (fixuid)
 #
 # TODO: detect arch other than x86_64
-RUN --mount=type=cache,target=/var/cache/apt \
-    --mount=type=cache,target=/var/lib/apt \
+RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
+    --mount=type=cache,sharing=private,target=/var/lib/apt \
     --mount=type=tmpfs,target=/var/log \
     set -eux; \
     export USERNAME=user; \
@@ -70,8 +70,8 @@ CMD [ "/bin/bash", "-i" ]
 # ---
 # 4. Install dependencies and common packages
 #
-RUN --mount=type=cache,target=/var/cache/apt \
-    --mount=type=cache,target=/var/lib/apt \
+RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
+    --mount=type=cache,sharing=private,target=/var/lib/apt \
     --mount=type=tmpfs,target=/var/log \
     set -eux; \
     apt-get update; \
@@ -85,8 +85,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
 # 5. Install PHP extensions and tweak configuration
 #
 # TODO: enable opcache for CLI
-RUN --mount=type=cache,target=/var/cache/apt \
-    --mount=type=cache,target=/var/lib/apt \
+RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
+    --mount=type=cache,sharing=private,target=/var/lib/apt \
     --mount=type=tmpfs,target=/var/log \
     set -eux; \
     # ---
@@ -141,8 +141,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
 # 6. Install NodeJS LTS and Yarn
 #
 # TODO: Support arch other than x86_64
-RUN --mount=type=cache,target=/var/cache/apt \
-    --mount=type=cache,target=/var/lib/apt \
+RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
+    --mount=type=cache,sharing=private,target=/var/lib/apt \
     --mount=type=tmpfs,target=/var/log \
     set -eux; \
     cd /tmp; \
@@ -188,8 +188,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
 # 7. Install other development utilities
 #
 # TODO: Support arch other than x86_64
-RUN --mount=type=cache,target=/var/cache/apt \
-    --mount=type=cache,target=/var/lib/apt \
+RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
+    --mount=type=cache,sharing=private,target=/var/lib/apt \
     --mount=type=tmpfs,target=/var/log \
     set -eux; \
     cd /tmp; \
