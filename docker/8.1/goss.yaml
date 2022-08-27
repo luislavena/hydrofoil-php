@@ -39,6 +39,12 @@ command:
     stdout:
       - string(27) "This is the Euro symbol €"
 
+  validate-php-ini-tweaks:
+    exec: "php -i"
+    exit-status: 0
+    stdout:
+      - "/memory_limit.*512M$/"
+
   composer-installed:
     exec: "composer --version"
     exit-status: 0

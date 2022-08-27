@@ -93,6 +93,11 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     # Configure PHP in development mode
     cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"; \
     # ---
+    # Additional tweaks for development
+    { \
+        echo "memory_limit=512M"; \
+    } | tee $PHP_INI_DIR/conf.d/zz-hydrofoil-tweaks.ini; \
+    # ---
     # Use `docker-php-ext-install` to ease installation of PHP
     # extensions
     #
