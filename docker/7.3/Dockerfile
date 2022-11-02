@@ -155,8 +155,8 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
       ; \
       export \
         NODEJS_MAJOR=14 \
-        NODEJS_VERSION=14.20.0 \
-        NODEJS_SHA256=a9026c2a07ca64eda5bca8e2d26fa1bc8f114202feda343405e894f0e76a4ff7 \
+        NODEJS_VERSION=14.21.0 \
+        NODEJS_SHA256=319a332d06813d0b3f736e51823dc085f51f1659ef40da33e1d3b3596e2ce1fe \
       ; \
       curl --fail -Lo nodejs.deb https://deb.nodesource.com/node_${NODEJS_MAJOR}.x/pool/main/n/nodejs/nodejs_${NODEJS_VERSION}-deb-1nodesource1_amd64.deb; \
       echo "${NODEJS_SHA256} *nodejs.deb" | sha256sum -c - >/dev/null 2>&1; \
