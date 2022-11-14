@@ -100,9 +100,9 @@ package:
     installed: true
   git:
     installed: true
-  openssh-client:
+  openssh-client-default:
     installed: true
-  p7zip-full:
+  p7zip:
     installed: true
   tmux:
     installed: true
