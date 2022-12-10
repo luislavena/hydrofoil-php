@@ -44,8 +44,8 @@ versions listed below:
 
 | Status      | Versions |
 | ----------- | -------- |
-| Supported   | [![](https://img.shields.io/static/v1?label=&message=8.2&color=green)](https://github.com/luislavena/hydrofoil-php/pkgs/container/hydrofoil-php) [![](https://img.shields.io/static/v1?label=&message=8.1&color=green)](https://github.com/luislavena/hydrofoil-php/pkgs/container/hydrofoil-php) [![](https://img.shields.io/static/v1?label=&message=8.0&color=green)](https://github.com/luislavena/hydrofoil-php/pkgs/container/hydrofoil-php) |
-| Unsupported | [![](https://img.shields.io/static/v1?label=&message=7.4&color=red)](https://github.com/luislavena/hydrofoil-php/pkgs/container/hydrofoil-php) [![](https://img.shields.io/static/v1?label=&message=7.3&color=red)](https://github.com/luislavena/hydrofoil-php/pkgs/container/hydrofoil-php) |
+| Supported   | [![](https://img.shields.io/badge/8.2-green)][package-registry] [![](https://img.shields.io/badge/8.1-green)][package-registry] [![](https://img.shields.io/badge/8.0-green)][package-registry] |
+| Unsupported | [![](https://img.shields.io/badge/7.4-red)][package-registry] [![](https://img.shields.io/badge/7.3-red)][package-registry] |
 
 Note that unsupported means no new builds will be produced for these versions
 as those might have reached EOL (End Of Life) support by PHP developers.
@@ -143,3 +143,4 @@ request or discuss.
 [docker-compose-yml]: https://docs.docker.com/compose/compose-file/compose-file-v3/
 [variable-substitution]: https://docs.docker.com/compose/compose-file/compose-file-v3/#variable-substitution
 [laravel-twill]: https://github.com/luislavena/template-laravel-twill
+[package-registry]: https://github.com/luislavena/hydrofoil-php/pkgs/container/hydrofoil-php
