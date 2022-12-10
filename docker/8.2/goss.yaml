@@ -1,0 +1,112 @@
+---
+command:
+  php-installed:
+    exec: "php --version"
+    exit-status: 0
+
+  php-installed-modules:
+    exec: "php --modules"
+    exit-status: 0
+    stdout:
+      - "/bcmath/"
+      - "/blackfire/"
+      - "/calendar/"
+      - "/ctype/"
+      - "/exif/"
+      - "/fileinfo/"
+      - "/gd/"
+      - "/intl/"
+      - "/json/"
+      - "/mbstring/"
+      - "/memcached/"
+      - "/OPcache/"
+      - "/openssl/"
+      - "/pcntl/"
+      - "/pdo/"
+      - "/pdo_mysql/"
+      - "/pdo_pgsql/"
+      - "/redis/"
+      - "/sockets/"
+      - "/tokenizer/"
+      - "/xdebug/"
+      - "/xml/"
+      - "/xsl/"
+      - "/zip/"
+
+  test-php-iconv-support:
+    exec: php -d error_reporting=22527 -d display_errors=1 -r 'var_dump(iconv("UTF-8", "UTF-8//IGNORE", "This is the Euro symbol €"));'
+    exit-status: 0
+    stdout:
+      - string(27) "This is the Euro symbol €"
+
+  validate-php-ini-tweaks:
+    exec: "php -i"
+    exit-status: 0
+    stdout:
+      - "/memory_limit.*512M$/"
+
+  composer-installed:
+    exec: "composer --version"
+    exit-status: 0
+
+  nodejs-installed:
+    exec: "node --version"
+    exit-status: 0
+
+  yarn-installed:
+    exec: "yarn --version"
+    exit-status: 0
+
+  mysql-installed:
+    exec: "mysql --version"
+    exit-status: 0
+
+  mysqldump-installed:
+    exec: "mysqldump --version"
+    exit-status: 0
+
+  pg_dump-installed:
+    exec: "pg_dump --version"
+    exit-status: 0
+
+  pg_restore-installed:
+    exec: "pg_restore --version"
+    exit-status: 0
+
+file:
+  /usr/local/bin/fixuid:
+    exists: true
+    mode: "4755"
+    owner: "root"
+    group: "root"
+  /etc/fixuid/config.yml:
+    exists: true
+
+user:
+  user:
+    exists: true
+    uid: 1000
+    gid: 1000
+    groups:
+      - user
+
+group:
+  user:
+    exists: true
+    gid: 1000
+
+package:
+  curl:
+    installed: true
+  git:
+    installed: true
+  openssh-client:
+    installed: true
+  p7zip-full:
+    installed: true
+  tmux:
+    installed: true
+  tzdata:
+    installed: true
+  unzip:
+    installed: true
