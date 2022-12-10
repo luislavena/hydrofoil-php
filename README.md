@@ -28,6 +28,7 @@ To be a functional image, it includes the following packages:
 
 * [Composer](https://getcomposer.org/): PHP defacto package manager, aligned with PHP releases
 * [NodeJS](https://nodejs.org/en/): the LTS version at the moment that aligned with PHP's release (Eg. v14 for PHP 7.4, v16 for PHP 8.0, etc)
+* [pnpm](https://pnpm.io/): alternate NodeJS package manager (recommended by newer tooling like Vue 3, Vite 4, etc)
 * [Classic Yarn](https://classic.yarnpkg.com/lang/en/): to allow bootstrapping on projects that haven't switched to Yarn 2
 
 Additionally, it includes the following packages:
@@ -35,6 +36,19 @@ Additionally, it includes the following packages:
 * [fixuid](https://github.com/boxboat/fixuid): tweaks container UID/GID to avoid ownership issues on mounted volumes
 * [Overmind](https://github.com/DarthSim/overmind): Advanced Procfile-based process manager
 * [watchexec](https://github.com/watchexec/watchexec): simple tool that watches a path and runs a command whenever it detects modifications
+
+## Support matrix
+
+This project will continuously build container images only for the supported
+versions listed below:
+
+| Status      | Versions |
+| ----------- | -------- |
+| Supported   | [![](https://img.shields.io/static/v1?label=&message=8.2&color=green)](https://github.com/luislavena/hydrofoil-php/pkgs/container/hydrofoil-php) [![](https://img.shields.io/static/v1?label=&message=8.1&color=green)](https://github.com/luislavena/hydrofoil-php/pkgs/container/hydrofoil-php) [![](https://img.shields.io/static/v1?label=&message=8.0&color=green)](https://github.com/luislavena/hydrofoil-php/pkgs/container/hydrofoil-php) |
+| Unsupported | [![](https://img.shields.io/static/v1?label=&message=7.4&color=red)](https://github.com/luislavena/hydrofoil-php/pkgs/container/hydrofoil-php) [![](https://img.shields.io/static/v1?label=&message=7.3&color=red)](https://github.com/luislavena/hydrofoil-php/pkgs/container/hydrofoil-php) |
+
+Note that unsupported means no new builds will be produced for these versions
+as those might have reached EOL (End Of Life) support by PHP developers.
 
 ## Requirements
 
@@ -51,7 +65,7 @@ To take full advantage of this container image, you need to adjust your
 ```yaml
 services:
   app:
-    image: ghcr.io/luislavena/hydrofoil-php:8.0
+    image: ghcr.io/luislavena/hydrofoil-php:8.2
     command: overmind start -f Procfile.dev
     working_dir: /app
 
