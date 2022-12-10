@@ -53,6 +53,10 @@ command:
     exec: "node --version"
     exit-status: 0
 
+  pnpm-installed:
+    exec: "pnpm --version"
+    exit-status: 0
+
   yarn-installed:
     exec: "yarn --version"
     exit-status: 0

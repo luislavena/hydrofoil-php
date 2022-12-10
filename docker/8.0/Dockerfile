@@ -169,6 +169,18 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
       rm -f nodejs.deb; \
     }; \
     # ---
+    # pnpm
+    { \
+      export \
+        PNPM_VERSION=7.18.1 \
+        PNPM_SHA256=29a51178a23c08c526f05991e23b883134e0c09f043d48ae7a7127bc3f4448d2 \
+      ; \
+      curl --fail -Lo pnpm-linuxstatic https://github.com/pnpm/pnpm/releases/download/v${PNPM_VERSION}/pnpm-linuxstatic-x64; \
+      echo "${PNPM_SHA256} *pnpm-linuxstatic" | sha256sum -c - >/dev/null 2>&1; \
+      chmod +x pnpm-linuxstatic; \
+      mv pnpm-linuxstatic /usr/local/bin/pnpm; \
+    }; \
+    # ---
     # Yarn
     { \
       export \
@@ -182,8 +194,10 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     }; \
     # smoke tests
     [ "$(command -v node)" = '/usr/bin/node' ]; \
+    [ "$(command -v pnpm)" = '/usr/local/bin/pnpm' ]; \
     [ "$(command -v yarn)" = '/usr/bin/yarn' ]; \
     node --version; \
+    pnpm --version; \
     yarn --version
 
 # ---
