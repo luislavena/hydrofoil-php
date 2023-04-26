@@ -160,8 +160,8 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
       ; \
       export \
         NODEJS_MAJOR=16 \
-        NODEJS_VERSION=16.19.1 \
-        NODEJS_SHA256=5a2e8a74463cf3c1f89f78b7a62aed5f2d8a85f2d1c65b59134981f7d358b838 \
+        NODEJS_VERSION=16.20.0 \
+        NODEJS_SHA256=8ec4a056be94f37e0edb1777e2a8ad9e1918e8f616e98a0adffa08ea14895d2e \
       ; \
       curl --fail -Lo nodejs.deb https://deb.nodesource.com/node_${NODEJS_MAJOR}.x/pool/main/n/nodejs/nodejs_${NODEJS_VERSION}-deb-1nodesource1_amd64.deb; \
       echo "${NODEJS_SHA256} *nodejs.deb" | sha256sum -c - >/dev/null 2>&1; \
