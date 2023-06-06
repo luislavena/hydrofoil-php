@@ -194,11 +194,12 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apk \
     set -eux; \
     cd /tmp; \
     # ---
-    # Database clients (PostgreSQL, MariaDB/MySQL)
+    # Database clients (PostgreSQL, MariaDB/MySQL, SQLite3)
     { \
         apk add \
             mariadb-client \
             postgresql-client \
+            sqlite \
         ; \
     }; \
     # ---

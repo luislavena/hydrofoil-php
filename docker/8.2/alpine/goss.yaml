@@ -108,6 +108,8 @@ package:
     installed: true
   openssh-client-default:
     installed: true
+  sqlite:
+    installed: true
   tmux:
     installed: true
   tzdata:
