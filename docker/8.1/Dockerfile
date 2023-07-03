@@ -175,8 +175,8 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     # pnpm
     { \
       export \
-        PNPM_VERSION=7.18.1 \
-        PNPM_SHA256=29a51178a23c08c526f05991e23b883134e0c09f043d48ae7a7127bc3f4448d2 \
+        PNPM_VERSION=7.33.3 \
+        PNPM_SHA256=23bbc4c73d88ce7c73937be927c15f0ea64cd925d149ddf77fb83602cc242e13 \
       ; \
       curl --fail -Lo pnpm-linuxstatic https://github.com/pnpm/pnpm/releases/download/v${PNPM_VERSION}/pnpm-linuxstatic-x64; \
       echo "${PNPM_SHA256} *pnpm-linuxstatic" | sha256sum -c - >/dev/null 2>&1; \
