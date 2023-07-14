@@ -61,7 +61,7 @@ jobs:
         id: cache
         with:
           image: ghcr.io/${{ github.repository }}/build-cache
-          tag-prefix: php-${{ matrix.php_major_minor }}--
+          flavor: prefix=php-${{ matrix.php_major_minor }}--
 
       - name: Build container images
         uses: depot/build-push-action@v1
