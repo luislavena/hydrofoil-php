@@ -18,7 +18,6 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
 # ---
 # 3. Setup non-root user (fixuid)
 #
-# TODO: detect arch other than x86_64
 RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     --mount=type=cache,sharing=private,target=/var/lib/apt \
     --mount=type=tmpfs,target=/var/log \
@@ -47,9 +46,22 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     # Install fixuid
     { \
         cd /tmp; \
-        export FIXUID_VERSION=0.5.1 \
-            FIXUID_SHA256=1077e7af13596e6e3902230d7260290fe21b2ee4fffcea1eb548e5c465a34800; \
-        curl --fail -Lo fixuid.tar.gz https://github.com/boxboat/fixuid/releases/download/v${FIXUID_VERSION}/fixuid-${FIXUID_VERSION}-linux-amd64.tar.gz; \
+        export FIXUID_VERSION=0.5.1; \
+        case "$(arch)" in \
+        x86_64) \
+            export \
+                FIXUID_ARCH=amd64 \
+                FIXUID_SHA256=1077e7af13596e6e3902230d7260290fe21b2ee4fffcea1eb548e5c465a34800 \
+            ; \
+            ;; \
+        aarch64) \
+            export \
+                FIXUID_ARCH=arm64 \
+                FIXUID_SHA256=7993a03876f5151c450e68a49706ef4c80d6b0ab755679eb47282df7f162fd82 \
+            ; \
+            ;; \
+        esac; \
+        curl --fail -Lo fixuid.tar.gz https://github.com/boxboat/fixuid/releases/download/v${FIXUID_VERSION}/fixuid-${FIXUID_VERSION}-linux-${FIXUID_ARCH}.tar.gz; \
         echo "${FIXUID_SHA256} *fixuid.tar.gz" | sha256sum -c - >/dev/null 2>&1; \
         tar -xf fixuid.tar.gz; \
         mv fixuid /usr/local/bin/; \
@@ -145,7 +157,6 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
 # ---
 # 6. Install NodeJS LTS and Yarn
 #
-# TODO: Support arch other than x86_64
 RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     --mount=type=cache,sharing=private,target=/var/lib/apt \
     --mount=type=tmpfs,target=/var/log \
@@ -164,9 +175,22 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
       export \
         NODEJS_MAJOR=18 \
         NODEJS_VERSION=18.16.1 \
-        NODEJS_SHA256=5bc6646eb88c82a409813733debca0ca93e49e9613af5a39cc2ad450899235e4 \
       ; \
-      curl --fail -Lo nodejs.deb https://deb.nodesource.com/node_${NODEJS_MAJOR}.x/pool/main/n/nodejs/nodejs_${NODEJS_VERSION}-deb-1nodesource1_amd64.deb; \
+      case "$(arch)" in \
+      x86_64) \
+          export \
+              NODEJS_ARCH=amd64 \
+              NODEJS_SHA256=5bc6646eb88c82a409813733debca0ca93e49e9613af5a39cc2ad450899235e4 \
+          ; \
+          ;; \
+      aarch64) \
+          export \
+              NODEJS_ARCH=arm64 \
+              NODEJS_SHA256=34871ded7a9905ab19f80e8b78c28764df7094f27e0371ce49bcd5d0c0f9818c \
+          ; \
+          ;; \
+      esac; \
+      curl --fail -Lo nodejs.deb https://deb.nodesource.com/node_${NODEJS_MAJOR}.x/pool/main/n/nodejs/nodejs_${NODEJS_VERSION}-deb-1nodesource1_${NODEJS_ARCH}.deb; \
       echo "${NODEJS_SHA256} *nodejs.deb" | sha256sum -c - >/dev/null 2>&1; \
       dpkg --install nodejs.deb; \
       rm -f nodejs.deb; \
@@ -176,9 +200,22 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     { \
       export \
         PNPM_VERSION=7.33.3 \
-        PNPM_SHA256=23bbc4c73d88ce7c73937be927c15f0ea64cd925d149ddf77fb83602cc242e13 \
       ; \
-      curl --fail -Lo pnpm-linuxstatic https://github.com/pnpm/pnpm/releases/download/v${PNPM_VERSION}/pnpm-linuxstatic-x64; \
+      case "$(arch)" in \
+      x86_64) \
+          export \
+              PNPM_ARCH=x64 \
+              PNPM_SHA256=23bbc4c73d88ce7c73937be927c15f0ea64cd925d149ddf77fb83602cc242e13 \
+          ; \
+          ;; \
+      aarch64) \
+          export \
+              PNPM_ARCH=arm64 \
+              PNPM_SHA256=ae17a95dfa70ab0fe0151d8626081e768892fd19652d4c5173cf1764edaf26d4 \
+          ; \
+          ;; \
+      esac; \
+      curl --fail -Lo pnpm-linuxstatic https://github.com/pnpm/pnpm/releases/download/v${PNPM_VERSION}/pnpm-linuxstatic-${PNPM_ARCH}; \
       echo "${PNPM_SHA256} *pnpm-linuxstatic" | sha256sum -c - >/dev/null 2>&1; \
       chmod +x pnpm-linuxstatic; \
       mv pnpm-linuxstatic /usr/local/bin/pnpm; \
@@ -206,7 +243,6 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
 # ---
 # 7. Install other development utilities
 #
-# TODO: Support arch other than x86_64
 RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     --mount=type=cache,sharing=private,target=/var/lib/apt \
     --mount=type=tmpfs,target=/var/log \
@@ -245,9 +281,23 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
             tmux \
         ; \
         export \
-            OVERMIND_VERSION=2.3.0 \
-            OVERMIND_SHA256=d6a715c0810ceb39c94bf61843befebe04a83a0469b53d6af0a52e2fea4e2ab3; \
-        curl --fail -Lo overmind.gz https://github.com/DarthSim/overmind/releases/download/v${OVERMIND_VERSION}/overmind-v${OVERMIND_VERSION}-linux-amd64.gz; \
+            OVERMIND_VERSION=2.4.0 \
+        ; \
+        case "$(arch)" in \
+        x86_64) \
+            export \
+                OVERMIND_ARCH=amd64 \
+                OVERMIND_SHA256=1f7cac289b550a71bebf4a29139e58831b39003d9831be59eed3e39a9097311c \
+            ; \
+            ;; \
+        aarch64) \
+            export \
+                OVERMIND_ARCH=arm64 \
+                OVERMIND_SHA256=94a3e8393bd718ae9ec1b6cc21740bffa52da20710eaf020a7aa679cdc926104 \
+            ; \
+            ;; \
+        esac; \
+        curl --fail -Lo overmind.gz https://github.com/DarthSim/overmind/releases/download/v${OVERMIND_VERSION}/overmind-v${OVERMIND_VERSION}-linux-${OVERMIND_ARCH}.gz; \
         echo "${OVERMIND_SHA256} *overmind.gz" | sha256sum -c - >/dev/null 2>&1; \
         gunzip overmind.gz; \
         chmod +x overmind; \
@@ -257,13 +307,27 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     # Watchexec
     { \
         export \
-            WATCHEXEC_VERSION=1.20.6 \
-            WATCHEXEC_SHA256=6e746704b61d4a2a467546930a837ceef3a4003fc568e574cf6f43a798a4ab00; \
-        curl --fail -Lo watchexec.tar.xz https://github.com/watchexec/watchexec/releases/download/v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-musl.tar.xz; \
+            WATCHEXEC_VERSION=1.21.1 \
+        ; \
+        case "$(arch)" in \
+        x86_64) \
+            export \
+                WATCHEXEC_ARCH=x86_64 \
+                WATCHEXEC_SHA256=807c05bf02dbe77b19e2acbfa9860ccbfcc0a3972fbf984f5b664b1ba5ef4f98 \
+            ; \
+            ;; \
+        aarch64) \
+            export \
+                WATCHEXEC_ARCH=aarch64 \
+                WATCHEXEC_SHA256=ebd3c97178eda2806e0e02149503269179cec09b95bdd2700de10a4eea54852b \
+            ; \
+            ;; \
+        esac; \
+        curl --fail -Lo watchexec.tar.xz https://github.com/watchexec/watchexec/releases/download/v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-${WATCHEXEC_ARCH}-unknown-linux-musl.tar.xz; \
         echo "${WATCHEXEC_SHA256} *watchexec.tar.xz" | sha256sum -c - >/dev/null 2>&1; \
         tar -xf watchexec.tar.xz; \
-        mv watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-musl/watchexec /usr/local/bin/; \
-        rm -rf watchexec.tar.xz watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-musl; \
+        mv watchexec-${WATCHEXEC_VERSION}-${WATCHEXEC_ARCH}-unknown-linux-musl/watchexec /usr/local/bin/; \
+        rm -rf watchexec.tar.xz watchexec-${WATCHEXEC_VERSION}-${WATCHEXEC_ARCH}-unknown-linux-musl; \
     }; \
     # smoke tests
     [ "$(command -v composer)" = '/usr/local/bin/composer' ]; \
