@@ -27,9 +27,6 @@ jobs:
       contents: read
       id-token: write
 
-    concurrency:
-      group: ${{ github.head_ref || github.run_id }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
