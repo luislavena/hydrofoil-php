@@ -170,27 +170,27 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     { \
       apt-get update; \
       apt-get install --no-install-recommends -y \
-          python3-minimal \
+          python3 \
       ; \
       export \
         NODEJS_MAJOR=18 \
-        NODEJS_VERSION=18.16.1 \
+        NODEJS_VERSION=18.18.0 \
       ; \
       case "$(arch)" in \
       x86_64) \
           export \
               NODEJS_ARCH=amd64 \
-              NODEJS_SHA256=5bc6646eb88c82a409813733debca0ca93e49e9613af5a39cc2ad450899235e4 \
+              NODEJS_SHA256=e9c392f8dc3513b6a700f8e01fcf522ca8c1d4edc121c7c0b06206799d0dbe93 \
           ; \
           ;; \
       aarch64) \
           export \
               NODEJS_ARCH=arm64 \
-              NODEJS_SHA256=34871ded7a9905ab19f80e8b78c28764df7094f27e0371ce49bcd5d0c0f9818c \
+              NODEJS_SHA256=4deeaedecbc44d1b4c1bb013017cc02e0daca9caa1cf2ad8e9288548d95e6621 \
           ; \
           ;; \
       esac; \
-      curl --fail -Lo nodejs.deb https://deb.nodesource.com/node_${NODEJS_MAJOR}.x/pool/main/n/nodejs/nodejs_${NODEJS_VERSION}-deb-1nodesource1_${NODEJS_ARCH}.deb; \
+      curl --fail -Lo nodejs.deb https://deb.nodesource.com/node_${NODEJS_MAJOR}.x/pool/main/n/nodejs/nodejs_${NODEJS_VERSION}-1nodesource1_${NODEJS_ARCH}.deb; \
       echo "${NODEJS_SHA256} *nodejs.deb" | sha256sum -c - >/dev/null 2>&1; \
       dpkg --install nodejs.deb; \
       rm -f nodejs.deb; \
