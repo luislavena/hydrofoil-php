@@ -117,8 +117,8 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     #
     # Ref: https://github.com/mlocati/docker-php-extension-installer
     export \
-      PHP_EXT_INSTALLER_VERSION=2.1.35 \
-      PHP_EXT_INSTALLER_SHA256SUM=b554624923976160a9104293d798216e56ecc255b2dcb587dabb95bb0e6ad222 \
+      PHP_EXT_INSTALLER_VERSION=2.1.55 \
+      PHP_EXT_INSTALLER_SHA256SUM=97eca1e1efb1c19bc74ebf12737cebab1c789b83e2051aaee7e90b2636c4b075 \
       IPE_GD_WITHOUTAVIF=1 \
     ; \
     cd /tmp; \
