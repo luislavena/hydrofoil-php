@@ -44,7 +44,7 @@ versions listed below:
 
 | Status      | Versions |
 | ----------- | -------- |
-| Supported   | [![](https://img.shields.io/badge/8.2-green)][package-registry] [![](https://img.shields.io/badge/8.1-green)][package-registry] |
+| Supported   | [![](https://img.shields.io/badge/8.3-green)][package-registry] [![](https://img.shields.io/badge/8.2-green)][package-registry] [![](https://img.shields.io/badge/8.1-green)][package-registry] |
 | Unsupported | [![](https://img.shields.io/badge/8.0-red)][package-registry] [![](https://img.shields.io/badge/7.4-red)][package-registry] [![](https://img.shields.io/badge/7.3-red)][package-registry] |
 
 Note that unsupported means no new builds will be produced for these versions
