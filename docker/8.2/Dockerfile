@@ -1,8 +1,8 @@
-# syntax = docker/dockerfile:1.3
+# syntax = docker/dockerfile:1.4
 
 # ---
 # 1. Use Debian 11 (bullseye) version of PHP
-FROM php:8.2.11-cli-bullseye AS base
+FROM php:8.2.13-cli-bullseye AS base
 
 # ---
 # 2. Upgrade system and installed dependencies for security patches
