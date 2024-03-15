@@ -134,7 +134,6 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     # (no need to install mbstring, pdo, tokenizer or xml as they are already part of base image)
     ./install-php-extensions \
       bcmath \
-      blackfire \
       calendar \
       exif \
       gd \
