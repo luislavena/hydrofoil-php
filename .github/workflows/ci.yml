@@ -26,12 +26,12 @@ jobs:
       id-token: write
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Define build number
         run: |
           echo "HYDROFOIL_PHP_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
-      - name: Checkout
-        uses: actions/checkout@v3
 
       - name: Set up Depot CLI
         uses: depot/setup-action@v1
