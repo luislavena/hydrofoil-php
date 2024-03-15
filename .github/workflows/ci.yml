@@ -26,6 +26,10 @@ jobs:
       id-token: write
 
     steps:
+      - name: Define build number
+        run: |
+          echo "HYDROFOIL_PHP_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -49,6 +53,7 @@ jobs:
             ghcr.io/luislavena/hydrofoil-php
           tags: |
             type=raw,${{ matrix.php_full_version }}
+            type=raw,${{ matrix.php_full_version }}-${{ env.HYDROFOIL_PHP_COMMIT }}
             type=raw,${{ matrix.php_major_minor }}
 
       - name: Setup Docker BuildKit cache strategy
