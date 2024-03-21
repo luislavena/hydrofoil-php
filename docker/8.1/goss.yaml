@@ -9,7 +9,6 @@ command:
     exit-status: 0
     stdout:
       - "/bcmath/"
-      - "/blackfire/"
       - "/calendar/"
       - "/ctype/"
       - "/exif/"
