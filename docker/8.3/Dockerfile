@@ -136,6 +136,7 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
       bcmath \
       calendar \
       exif \
+      ftp \
       gd \
       intl \
       memcached-stable \

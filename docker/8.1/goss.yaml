@@ -13,6 +13,7 @@ command:
       - "/ctype/"
       - "/exif/"
       - "/fileinfo/"
+      - "/ftp/"
       - "/gd/"
       - "/intl/"
       - "/json/"
