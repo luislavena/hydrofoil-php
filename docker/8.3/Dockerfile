@@ -107,7 +107,7 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     # ---
     # Additional tweaks for development
     { \
-        echo "memory_limit=512M"; \
+        echo "memory_limit=1024M"; \
     } | tee $PHP_INI_DIR/conf.d/zz-hydrofoil-tweaks.ini; \
     # ---
     # Use `docker-php-ext-install` to ease installation of PHP
