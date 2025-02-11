@@ -2,7 +2,7 @@
 
 # ---
 # 1. Use Debian 11 (bullseye) version of PHP
-FROM php:8.3.13-cli-bullseye AS base
+FROM php:8.3.16-cli-bullseye AS base
 
 # ---
 # 2. Upgrade system and installed dependencies for security patches
@@ -174,19 +174,19 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
       ; \
       export \
         NODEJS_MAJOR=20 \
-        NODEJS_VERSION=20.0.0 \
+        NODEJS_VERSION=20.18.3 \
       ; \
       case "$(arch)" in \
       x86_64) \
           export \
               NODEJS_ARCH=amd64 \
-              NODEJS_SHA256=9d39b2317bb02c565e3d50ab9b53d0ba72ac6800bf80a9a84795f28d29424112 \
+              NODEJS_SHA256=5ca8dda65890dfb4aa8eb060c3a502aa3e5775d7362ed741b2613fa5cc58ba55 \
           ; \
           ;; \
       aarch64) \
           export \
               NODEJS_ARCH=arm64 \
-              NODEJS_SHA256=3e8e958a99e485dad9fe19b1ea49ce738da0476f7139e565341e6e22b8ecede7 \
+              NODEJS_SHA256=a2dfe2d71946b89ef31b6c150c8c1e98925cc6efc2b73c48199d2b8c151c4cf6 \
           ; \
           ;; \
       esac; \
