@@ -1,4 +1,4 @@
-VERSION ?= 8.3
+VERSION ?= 8.4
 REGISTRY ?= ghcr.io
 
 DOCKERFILE := docker/${VERSION}/Dockerfile
