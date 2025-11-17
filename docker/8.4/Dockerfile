@@ -173,20 +173,20 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
           python3 \
       ; \
       export \
-        NODEJS_MAJOR=20 \
-        NODEJS_VERSION=20.18.3 \
+        NODEJS_MAJOR=24 \
+        NODEJS_VERSION=24.11.1 \
       ; \
       case "$(arch)" in \
       x86_64) \
           export \
               NODEJS_ARCH=amd64 \
-              NODEJS_SHA256=5ca8dda65890dfb4aa8eb060c3a502aa3e5775d7362ed741b2613fa5cc58ba55 \
+              NODEJS_SHA256=762198decec958486ac7850eac6ded75d7ab7f26ab85886eba4d5ee3fa641605 \
           ; \
           ;; \
       aarch64) \
           export \
               NODEJS_ARCH=arm64 \
-              NODEJS_SHA256=a2dfe2d71946b89ef31b6c150c8c1e98925cc6efc2b73c48199d2b8c151c4cf6 \
+              NODEJS_SHA256=9bc63e3da115d5adc151e585a2da1e3d5aac7859edf53ad41d7a5e1d4997c4f8 \
           ; \
           ;; \
       esac; \
