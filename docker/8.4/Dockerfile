@@ -46,18 +46,18 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     # Install fixuid
     { \
         cd /tmp; \
-        export FIXUID_VERSION=0.5.1; \
+        export FIXUID_VERSION=0.6.0; \
         case "$(arch)" in \
         x86_64) \
             export \
                 FIXUID_ARCH=amd64 \
-                FIXUID_SHA256=1077e7af13596e6e3902230d7260290fe21b2ee4fffcea1eb548e5c465a34800 \
+                FIXUID_SHA256=8c47f64ec4eec60e79871796ea4097ead919f7fcdedace766da9510b78c5fa14 \
             ; \
             ;; \
         aarch64) \
             export \
                 FIXUID_ARCH=arm64 \
-                FIXUID_SHA256=7993a03876f5151c450e68a49706ef4c80d6b0ab755679eb47282df7f162fd82 \
+                FIXUID_SHA256=827e0b480c38470b5defb84343be7bb4e85b9efcbf3780ac779374e8b040a969 \
             ; \
             ;; \
         esac; \
