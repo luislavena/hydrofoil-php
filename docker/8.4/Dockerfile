@@ -199,19 +199,19 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     # pnpm
     { \
       export \
-        PNPM_VERSION=8.12.1 \
+        PNPM_VERSION=10.22.0 \
       ; \
       case "$(arch)" in \
       x86_64) \
           export \
               PNPM_ARCH=x64 \
-              PNPM_SHA256=67af34620199304887da5c0f89b1824dba1ab6c20c214d7fda143d3e101a4b06 \
+              PNPM_SHA256=115f1b5fa5390096976d29116e9bf469509f29d9b91a3dd6767aad50c78ca18c \
           ; \
           ;; \
       aarch64) \
           export \
               PNPM_ARCH=arm64 \
-              PNPM_SHA256=0bfeb6dbf857093e95075d167b52cf99283a3cb185a2bd6d64e3c049d84900f4 \
+              PNPM_SHA256=f62e9ef43024a9d4648ff03a14d49cc552da6bb51978c0eae9cda04999e5f39f \
           ; \
           ;; \
       esac; \
