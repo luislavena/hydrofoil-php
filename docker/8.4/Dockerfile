@@ -1,8 +1,11 @@
 # syntax = docker/dockerfile:1.4
 
+ARG PHP_VERSION=8.4.14
+ARG BASE_DISTRO=trixie
+
 # ---
-# 1. Use Debian 13 (trixie) version of PHP
-FROM php:8.4.14-cli-trixie AS base
+# 1. Use Debian (${BASE_DISTRO}) version of PHP
+FROM php:${PHP_VERSION}-cli-${BASE_DISTRO} AS base
 
 # ---
 # 2. Upgrade system and installed dependencies for security patches

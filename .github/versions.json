@@ -1,0 +1,18 @@
+{
+  "8.1": {
+    "php_full": "8.1.30",
+    "base_distro": "bullseye"
+  },
+  "8.2": {
+    "php_full": "8.2.25",
+    "base_distro": "bullseye"
+  },
+  "8.3": {
+    "php_full": "8.3.16",
+    "base_distro": "bullseye"
+  },
+  "8.4": {
+    "php_full": "8.4.14",
+    "base_distro": "trixie"
+  }
+}

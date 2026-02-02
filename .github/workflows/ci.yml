@@ -5,40 +5,113 @@ on:
   push:
     branches:
       - "main"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'PHP version to build (e.g., 8.4) or "all" for all versions'
+        required: false
+        default: 'all'
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has_changes: ${{ steps.set-matrix.outputs.has_changes }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed docker directories
+        if: github.event_name != 'workflow_dispatch'
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          list-files: json
+          filters: |
+            docker:
+              - 'docker/**'
+
+      - name: Generate build matrix
+        id: set-matrix
+        run: |
+          VERSIONS_FILE=".github/versions.json"
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            # Manual trigger - build specified version or all
+            INPUT_VERSION="${{ github.event.inputs.version }}"
+            if [[ "$INPUT_VERSION" == "all" || -z "$INPUT_VERSION" ]]; then
+              CHANGED_DIRS=$(jq -r 'keys[]' "$VERSIONS_FILE")
+            else
+              CHANGED_DIRS="$INPUT_VERSION"
+            fi
+          else
+            # Automatic trigger - only changed directories
+            CHANGED_FILES='${{ steps.filter.outputs.docker_files }}'
+            if [[ "$CHANGED_FILES" == "[]" || -z "$CHANGED_FILES" ]]; then
+              echo "matrix={\"include\":[]}" >> $GITHUB_OUTPUT
+              echo "has_changes=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+            CHANGED_DIRS=$(echo "$CHANGED_FILES" | jq -r '.[]' | sed -n 's|^docker/\([^/]*\)/.*|\1|p' | sort -u)
+          fi
+
+          # Build matrix from changed directories
+          MATRIX_INCLUDE="[]"
+          for DIR in $CHANGED_DIRS; do
+            if jq -e --arg v "$DIR" '.[$v]' "$VERSIONS_FILE" > /dev/null 2>&1; then
+              ENTRY=$(jq -c --arg v "$DIR" '{
+                php_major_minor: $v,
+                php_full: .[$v].php_full,
+                base_distro: .[$v].base_distro,
+                concurrency_group: "build-php"
+              }' "$VERSIONS_FILE")
+              MATRIX_INCLUDE=$(echo "$MATRIX_INCLUDE" | jq -c --argjson e "$ENTRY" '. + [$e]')
+            fi
+          done
+
+          echo "matrix={\"include\":$MATRIX_INCLUDE}" >> $GITHUB_OUTPUT
+          if [[ "$MATRIX_INCLUDE" == "[]" ]]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
   build:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - { php_major_minor: "8.4", php_full_version: "8.4.14" }
-          - { php_major_minor: "8.3", php_full_version: "8.3.16" }
-          - { php_major_minor: "8.2", php_full_version: "8.2.25" }
-          - { php_major_minor: "8.1", php_full_version: "8.1.30" }
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.matrix) }}
 
     name: >-
-      PHP ${{ matrix.php_full_version }}
+      PHP ${{ matrix.php_full }} (${{ matrix.php_major_minor }})
 
     permissions:
       contents: read
       packages: write
       id-token: write
 
+    concurrency:
+      group: ${{ matrix.concurrency_group || format('{0}-{1}', github.run_id, matrix.php_full) }}
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Define build number
         run: |
-          echo "HYDROFOIL_PHP_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "HYDROFOIL_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Set up Depot CLI
         uses: depot/setup-action@v1
 
       - name: Docker GitHub Registry Login
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -46,15 +119,15 @@ jobs:
 
       - name: Docker Metadata action
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           flavor: |
             latest=false
           images: |
             ghcr.io/luislavena/hydrofoil-php
           tags: |
-            type=raw,${{ matrix.php_full_version }}
-            type=raw,${{ matrix.php_full_version }}-${{ env.HYDROFOIL_PHP_COMMIT }}
+            type=raw,${{ matrix.php_full }}
+            type=raw,${{ matrix.php_full }}-${{ env.HYDROFOIL_COMMIT }}
             type=raw,${{ matrix.php_major_minor }}
 
       - name: Setup Docker BuildKit cache strategy
@@ -64,38 +137,18 @@ jobs:
           image: ghcr.io/${{ github.repository }}/build-cache
           flavor: prefix=php-${{ matrix.php_major_minor }}--
 
-      - name: Build container images
+      - name: Build Docker images
         uses: depot/build-push-action@v1
         with:
           project: ${{ secrets.DEPOT_PROJECT_ID }}
+          token: ${{ secrets.DEPOT_PROJECT_TOKEN }}
           context: docker/${{ matrix.php_major_minor }}
+          build-args: |
+            PHP_VERSION=${{ matrix.php_full }}
+            BASE_DISTRO=${{ matrix.base_distro }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
-          pull: true
           push: ${{ github.event_name != 'pull_request' }}
           cache-from: ${{ steps.cache.outputs.cache-from }}
           cache-to: ${{ steps.cache.outputs.cache-to }}
-
-      # FIXME: re-enable testing before pushing
-      # - name: Install Goss
-      #   uses: e1himself/goss-installation-action@v1.1.0
-      #   with:
-      #     version: 'v0.3.20'
-
-      # - name: Test Docker image
-      #   run: dgoss run local-image:ci sleep infinity
-      #   env:
-      #     GOSS_FILE: docker/${{ matrix.php_major_minor }}/goss.yaml
-
-      # - name: Push Docker images
-      #   uses: docker/build-push-action@v3.2.0
-      #   with:
-      #     context: docker/${{ matrix.php_major_minor }}
-      #     tags: ${{ steps.meta.outputs.tags }}
-      #     labels: ${{ steps.meta.outputs.labels }}
-      #     platforms: |
-      #       linux/amd64
-      #     push: ${{ github.event_name != 'pull_request' }}
-      #     cache-from: ${{ steps.cache.outputs.cache-from }}
-      #     cache-to: ${{ steps.cache.outputs.cache-to }}

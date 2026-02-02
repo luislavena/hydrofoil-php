@@ -1,8 +1,11 @@
 # syntax = docker/dockerfile:1.4
 
+ARG PHP_VERSION=8.1.30
+ARG BASE_DISTRO=bullseye
+
 # ---
-# 1. Use Debian 11 (bullseye) version of PHP
-FROM php:8.1.30-cli-bullseye AS base
+# 1. Use Debian (${BASE_DISTRO}) version of PHP
+FROM php:${PHP_VERSION}-cli-${BASE_DISTRO} AS base
 
 # ---
 # 2. Upgrade system and installed dependencies for security patches
