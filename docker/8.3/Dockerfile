@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:1.4
+# syntax = docker/dockerfile:1
 
 ARG PHP_VERSION=8.3.16
 ARG BASE_DISTRO=bullseye
