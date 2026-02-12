@@ -9,7 +9,7 @@
   },
   "8.3": {
     "php_full": "8.3.30",
-    "base_distro": "bullseye"
+    "base_distro": "bookworm"
   },
   "8.4": {
     "php_full": "8.4.14",
