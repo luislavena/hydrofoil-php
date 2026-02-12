@@ -1,7 +1,7 @@
-# syntax = docker/dockerfile:1.4
+# syntax = docker/dockerfile:1
 
-ARG PHP_VERSION=8.3.16
-ARG BASE_DISTRO=bullseye
+ARG PHP_VERSION=8.3.30
+ARG BASE_DISTRO=bookworm
 
 # ---
 # 1. Use Debian (${BASE_DISTRO}) version of PHP
@@ -49,18 +49,18 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     # Install fixuid
     { \
         cd /tmp; \
-        export FIXUID_VERSION=0.5.1; \
+        export FIXUID_VERSION=0.6.0; \
         case "$(arch)" in \
         x86_64) \
             export \
                 FIXUID_ARCH=amd64 \
-                FIXUID_SHA256=1077e7af13596e6e3902230d7260290fe21b2ee4fffcea1eb548e5c465a34800 \
+                FIXUID_SHA256=8c47f64ec4eec60e79871796ea4097ead919f7fcdedace766da9510b78c5fa14 \
             ; \
             ;; \
         aarch64) \
             export \
                 FIXUID_ARCH=arm64 \
-                FIXUID_SHA256=7993a03876f5151c450e68a49706ef4c80d6b0ab755679eb47282df7f162fd82 \
+                FIXUID_SHA256=827e0b480c38470b5defb84343be7bb4e85b9efcbf3780ac779374e8b040a969 \
             ; \
             ;; \
         esac; \
@@ -120,8 +120,8 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     #
     # Ref: https://github.com/mlocati/docker-php-extension-installer
     export \
-      PHP_EXT_INSTALLER_VERSION=2.6.1 \
-      PHP_EXT_INSTALLER_SHA256SUM=041f9a66451dece1800e1f0990a08b2c07fdce11e9788001fde065ba8d77d2f1 \
+      PHP_EXT_INSTALLER_VERSION=2.9.30 \
+      PHP_EXT_INSTALLER_SHA256SUM=68aa2cbd4740bf6db4f9ae005f90cf5892719dbeb1a01847dd068e8fe8994bd3 \
       IPE_GD_WITHOUTAVIF=1 \
     ; \
     cd /tmp; \
@@ -146,7 +146,7 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
       pcntl \
       pdo_mysql \
       pdo_pgsql \
-      redis-5.3.7 \
+      redis-stable \
       sockets \
       xdebug-stable \
       xsl \
@@ -177,19 +177,19 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
       ; \
       export \
         NODEJS_MAJOR=20 \
-        NODEJS_VERSION=20.18.3 \
+        NODEJS_VERSION=20.20.0 \
       ; \
       case "$(arch)" in \
       x86_64) \
           export \
               NODEJS_ARCH=amd64 \
-              NODEJS_SHA256=5ca8dda65890dfb4aa8eb060c3a502aa3e5775d7362ed741b2613fa5cc58ba55 \
+              NODEJS_SHA256=f4eaaf98ac864a4294b1366c3ea6cef7b030447b1e1e26a501bb059af0cf1622 \
           ; \
           ;; \
       aarch64) \
           export \
               NODEJS_ARCH=arm64 \
-              NODEJS_SHA256=a2dfe2d71946b89ef31b6c150c8c1e98925cc6efc2b73c48199d2b8c151c4cf6 \
+              NODEJS_SHA256=e086539ac3d067f2c3cbc96f98f3324a1195dcba22281165f531d1f413ee814c \
           ; \
           ;; \
       esac; \
@@ -227,8 +227,8 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     # Yarn
     { \
       export \
-        YARN_VERSION=1.22.19 \
-        YARN_SHA256=666cc8c015bb9e36236fc355816711fbc88bbba97ce8344d3ea2a36debcf7424 \
+        YARN_VERSION=1.22.22 \
+        YARN_SHA256=bdd227d3fead0510a1a75620ffa7369f61f50711505efa9dc371e14dca04e33e \
       ; \
       curl --fail -Lo yarn.deb https://github.com/yarnpkg/yarn/releases/download/v${YARN_VERSION}/yarn_${YARN_VERSION}_all.deb; \
       echo "${YARN_SHA256} *yarn.deb" | sha256sum -c - >/dev/null 2>&1; \
@@ -269,8 +269,8 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
             unzip \
         ; \
         export \
-            COMPOSER_VERSION=2.7.2 \
-            COMPOSER_SHA256=049b8e0ed9f264d770a0510858cffbc35401510759edc9a784b3a5c6e020bcac \
+            COMPOSER_VERSION=2.9.5 \
+            COMPOSER_SHA256=c86ce603fe836bf0861a38c93ac566c8f1e69ac44b2445d9b7a6a17ea2e9972a \
         ; \
         curl --fail -Lo composer.phar https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar; \
         echo "${COMPOSER_SHA256} *composer.phar" | sha256sum -c - >/dev/null 2>&1; \
@@ -285,19 +285,19 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
             tmux \
         ; \
         export \
-            OVERMIND_VERSION=2.4.0 \
+            OVERMIND_VERSION=2.5.1 \
         ; \
         case "$(arch)" in \
         x86_64) \
             export \
                 OVERMIND_ARCH=amd64 \
-                OVERMIND_SHA256=1f7cac289b550a71bebf4a29139e58831b39003d9831be59eed3e39a9097311c \
+                OVERMIND_SHA256=a17159b8e97d13f3679a4e8fbc9d4747f82d5af9f6d32597b72821378b5d0b6f \
             ; \
             ;; \
         aarch64) \
             export \
                 OVERMIND_ARCH=arm64 \
-                OVERMIND_SHA256=94a3e8393bd718ae9ec1b6cc21740bffa52da20710eaf020a7aa679cdc926104 \
+                OVERMIND_SHA256=42cb6d79c8adcf4c68dfb2ddf09e63a0803b023af5b17d42e05ccbfa4b86bee2 \
             ; \
             ;; \
         esac; \
