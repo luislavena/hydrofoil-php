@@ -146,7 +146,7 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
       pcntl \
       pdo_mysql \
       pdo_pgsql \
-      redis-5.3.7 \
+      redis-stable \
       sockets \
       xdebug-stable \
       xsl \
