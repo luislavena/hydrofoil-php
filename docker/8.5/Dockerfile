@@ -157,3 +157,80 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     # so there is no shared extension left to enable
     # remove PHP extension installer
     rm -f ./install-php-extensions
+
+# ---
+# 6. Install NodeJS and pnpm (via mise)
+#
+# The system shims folder resolves the tools declared in /etc/mise/config.toml.
+# The user shims folder goes last, so tools a user adds later also resolve.
+# That folder does not exist in a fresh image, which is harmless.
+ENV PATH=/usr/local/share/mise/shims:$PATH:/home/user/.local/share/mise/shims
+
+RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
+    --mount=type=cache,sharing=private,target=/var/lib/apt \
+    --mount=type=tmpfs,target=/var/log \
+    set -eux; \
+    cd /tmp; \
+    # ---
+    # python3 is needed by node-gyp to build native modules
+    { \
+      apt-get update; \
+      apt-get install --no-install-recommends -y \
+          python3 \
+      ; \
+    }; \
+    # ---
+    # mise: installs and pins NodeJS and pnpm
+    #
+    # Ref: https://mise.jdx.dev/
+    { \
+        export MISE_VERSION=2026.9.9; \
+        case "$(arch)" in \
+        x86_64) \
+            export \
+                MISE_ARCH=x64 \
+                MISE_SHA256=e4767e4854af5daeff2191b2bbdc94f834742a23efad591dbd33187861d41604 \
+            ; \
+            ;; \
+        aarch64) \
+            export \
+                MISE_ARCH=arm64 \
+                MISE_SHA256=5f72efaa1265c9c3562ecf8d22e6623b5278700bd7ef1014a785d0ce1d1a90b2 \
+            ; \
+            ;; \
+        esac; \
+        curl --fail -Lo mise.tar.gz https://github.com/jdx/mise/releases/download/v${MISE_VERSION}/mise-v${MISE_VERSION}-linux-${MISE_ARCH}.tar.gz; \
+        echo "${MISE_SHA256} *mise.tar.gz" | sha256sum -c - >/dev/null 2>&1; \
+        tar -xf mise.tar.gz; \
+        mv mise/bin/mise /usr/local/bin/; \
+        rm -rf mise.tar.gz mise; \
+    }; \
+    # ---
+    # System-wide tool versions and settings
+    #
+    # `not_found_auto_install` off stops a shim downloading a version at run
+    # time. `not_found_system_fallback` off stops a shim running an unrelated
+    # command with the same name. Together they turn a project that pins its
+    # own version into a clear message instead of a surprise.
+    mkdir -p /etc/mise; \
+    { \
+        echo '[tools]'; \
+        echo 'node = "24.21.0"'; \
+        echo 'pnpm = "12.4.2"'; \
+        echo ''; \
+        echo '[settings]'; \
+        echo 'not_found_auto_install = false'; \
+        echo 'not_found_system_fallback = false'; \
+    } | tee /etc/mise/config.toml; \
+    # `--system` installs outside any home folder, so every user shares them
+    mise install --system; \
+    chmod -R a+rX /usr/local/share/mise; \
+    # smoke tests
+    [ "$(command -v mise)" = '/usr/local/bin/mise' ]; \
+    [ "$(command -v node)" = '/usr/local/share/mise/shims/node' ]; \
+    [ "$(command -v npm)" = '/usr/local/share/mise/shims/npm' ]; \
+    [ "$(command -v pnpm)" = '/usr/local/share/mise/shims/pnpm' ]; \
+    mise --version; \
+    node --version; \
+    npm --version; \
+    pnpm --version
