@@ -234,3 +234,105 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     node --version; \
     npm --version; \
     pnpm --version
+
+# ---
+# 7. Install other development utilities
+#
+# watchexec and Overmind stay as direct downloads. mise installs these through
+# its `github:` backend, which calls the GitHub API. That API allows only 60
+# requests per hour without a token, which would make builds fail at random.
+RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
+    --mount=type=cache,sharing=private,target=/var/lib/apt \
+    --mount=type=tmpfs,target=/var/log \
+    set -eux; \
+    cd /tmp; \
+    # ---
+    # Database clients (PostgreSQL, MariaDB/MySQL)
+    { \
+        apt-get update; \
+        apt-get install --no-install-recommends -y \
+            mariadb-client \
+            postgresql-client \
+        ; \
+    }; \
+    # ---
+    # Composer (needs 7z, unzip)
+    { \
+        apt-get update; \
+        apt-get install --no-install-recommends -y \
+            p7zip-full \
+            unzip \
+        ; \
+        export \
+            COMPOSER_VERSION=2.10.3 \
+            COMPOSER_SHA256=7a2d379d5b8ffdaa028580ef26494c36d2feef4b178d3dd1473a4dbc5e17c8d6 \
+        ; \
+        curl --fail -Lo composer.phar https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar; \
+        echo "${COMPOSER_SHA256} *composer.phar" | sha256sum -c - >/dev/null 2>&1; \
+        chmod +x composer.phar; \
+        mv composer.phar /usr/local/bin/composer; \
+    }; \
+    # ---
+    # Overmind (needs tmux)
+    { \
+        apt-get update; \
+        apt-get install --no-install-recommends -y \
+            tmux \
+        ; \
+        export \
+            OVERMIND_VERSION=2.5.1 \
+        ; \
+        case "$(arch)" in \
+        x86_64) \
+            export \
+                OVERMIND_ARCH=amd64 \
+                OVERMIND_SHA256=a17159b8e97d13f3679a4e8fbc9d4747f82d5af9f6d32597b72821378b5d0b6f \
+            ; \
+            ;; \
+        aarch64) \
+            export \
+                OVERMIND_ARCH=arm64 \
+                OVERMIND_SHA256=42cb6d79c8adcf4c68dfb2ddf09e63a0803b023af5b17d42e05ccbfa4b86bee2 \
+            ; \
+            ;; \
+        esac; \
+        curl --fail -Lo overmind.gz https://github.com/DarthSim/overmind/releases/download/v${OVERMIND_VERSION}/overmind-v${OVERMIND_VERSION}-linux-${OVERMIND_ARCH}.gz; \
+        echo "${OVERMIND_SHA256} *overmind.gz" | sha256sum -c - >/dev/null 2>&1; \
+        gunzip overmind.gz; \
+        chmod +x overmind; \
+        mv overmind /usr/local/bin/; \
+    }; \
+    # ---
+    # Watchexec
+    { \
+        export \
+            WATCHEXEC_VERSION=2.7.3 \
+        ; \
+        case "$(arch)" in \
+        x86_64) \
+            export \
+                WATCHEXEC_ARCH=x86_64 \
+                WATCHEXEC_SHA256=8ace3a1d2e752d189f28b6766311d58f155ab977fae66aba60b111ec8aec2f64 \
+            ; \
+            ;; \
+        aarch64) \
+            export \
+                WATCHEXEC_ARCH=aarch64 \
+                WATCHEXEC_SHA256=02b3e2beddf96fef5fb2b88849902e3cf9e96da87968bdfb7a488700d64142cc \
+            ; \
+            ;; \
+        esac; \
+        curl --fail -Lo watchexec.tar.xz https://github.com/watchexec/watchexec/releases/download/v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-${WATCHEXEC_ARCH}-unknown-linux-gnu.tar.xz; \
+        echo "${WATCHEXEC_SHA256} *watchexec.tar.xz" | sha256sum -c - >/dev/null 2>&1; \
+        tar -xf watchexec.tar.xz; \
+        mv watchexec-${WATCHEXEC_VERSION}-${WATCHEXEC_ARCH}-unknown-linux-gnu/watchexec /usr/local/bin/; \
+        rm -rf watchexec.tar.xz watchexec-${WATCHEXEC_VERSION}-${WATCHEXEC_ARCH}-unknown-linux-gnu; \
+    }; \
+    # smoke tests
+    [ "$(command -v composer)" = '/usr/local/bin/composer' ]; \
+    [ "$(command -v overmind)" = '/usr/local/bin/overmind' ]; \
+    [ "$(command -v watchexec)" = '/usr/local/bin/watchexec' ]; \
+    [ "$(command -v tmux)" = '/usr/bin/tmux' ]; \
+    composer --version; \
+    overmind --version; \
+    watchexec --version
