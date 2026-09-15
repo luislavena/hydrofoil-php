@@ -353,17 +353,23 @@ RUN set -eux; \
     php -m | grep -qx "Zend OPcache" || { echo "missing PHP extension: OPcache" >&2; exit 1; }; \
     php -m | grep -qx "xdebug" || { echo "missing PHP extension: xdebug" >&2; exit 1; }; \
     # PHP configuration
-    php -i | grep -qE '^memory_limit => 1024M' || { echo "memory_limit is not 1024M" >&2; exit 1; }; \
+    php -i | grep -qE '^memory_limit => 1024M => 1024M$' || { echo "memory_limit is not 1024M" >&2; exit 1; }; \
     # iconv handles the Euro symbol
     php -d error_reporting=22527 -d display_errors=1 \
         -r 'var_dump(iconv("UTF-8", "UTF-8//IGNORE", "This is the Euro symbol €"));' \
-        | grep -q 'string(27)'; \
+        | grep -q 'string(27)' || { echo "iconv does not handle the Euro symbol" >&2; exit 1; }; \
     # fixuid is present and setuid root
-    [ "$(stat -c '%a %U %G' /usr/local/bin/fixuid)" = '4755 root root' ]; \
-    [ -f /etc/fixuid/config.yml ]; \
+    [ "$(stat -c '%a %U %G' /usr/local/bin/fixuid)" = '4755 root root' ] || { echo "fixuid is not setuid root" >&2; exit 1; }; \
+    [ -f /etc/fixuid/config.yml ] || { echo "missing /etc/fixuid/config.yml" >&2; exit 1; }; \
     # the non-root user exists with the expected ids
-    [ "$(id -u user)" = '1000' ]; \
-    [ "$(id -g user)" = '1000' ]; \
+    [ "$(id -u user)" = '1000' ] || { echo "user uid is not 1000" >&2; exit 1; }; \
+    [ "$(id -g user)" = '1000' ] || { echo "user gid is not 1000" >&2; exit 1; }; \
+    [ "$(id -gn user)" = 'user' ] || { echo "user group is not named user" >&2; exit 1; }; \
+    # packages the image depends on at run time
+    for cmd in curl git ssh 7z unzip tmux; do \
+        command -v "$cmd" >/dev/null || { echo "missing command: $cmd" >&2; exit 1; }; \
+    done; \
+    [ -e /usr/share/zoneinfo/UTC ] || { echo "missing tzdata" >&2; exit 1; }; \
     # database clients
     mysql --version; \
     mysqldump --version; \
