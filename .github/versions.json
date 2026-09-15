@@ -14,5 +14,9 @@
   "8.4": {
     "php_full": "8.4.14",
     "base_distro": "trixie"
+  },
+  "8.5": {
+    "php_full": "8.5.10",
+    "base_distro": "trixie"
   }
 }

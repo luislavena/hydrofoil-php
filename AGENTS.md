@@ -16,21 +16,22 @@ Technologies: Dockerfile, YAML (goss/GitHub Actions), Makefile, Shell, JSON
   workflows/ci.yml    # CI pipeline with change detection
   versions.json       # PHP version definitions (source of truth)
 docker/
-  8.1/, 8.2/, 8.3/    # PHP versions (Debian bullseye)
-  8.4/                # PHP 8.4 (Debian trixie) - latest
+  8.1/, 8.2/          # PHP versions (Debian bullseye)
+  8.3/                # PHP 8.3 (Debian bookworm)
+  8.4/, 8.5/          # PHP 8.4 and 8.5 (Debian trixie) - 8.5 is latest
     Dockerfile        # Build definition
-    goss.yaml         # Test specification
+    goss.yaml         # Test specification (8.4 and older only)
 Makefile              # Build and test commands
 ```
 
 ## Commands
 
 ```bash
-make build VERSION=8.4    # Build image (default: 8.4)
-make test VERSION=8.4     # Build and test (default: 8.4)
+make build VERSION=8.5    # Build image (default: 8.5)
+make test VERSION=8.5     # Build and test (default: 8.5)
 ```
 
-Manual dgoss test: `GOSS_FILE=docker/8.4/goss.yaml dgoss run ghcr.io/luislavena/hydrofoil-php:8.4 sleep infinity`
+Manual dgoss test (8.4 and older): `GOSS_FILE=docker/8.4/goss.yaml dgoss run ghcr.io/luislavena/hydrofoil-php:8.4 sleep infinity`
 
 ## PHP versions configuration
 
@@ -44,6 +45,21 @@ When updating a tool:
 1. Update `TOOL_VERSION` reference in the specific Dockerfile
 2. Update SHA256 checksums of that tool
 3. Run `make test VERSION=X.Y` to verify
+
+## NodeJS tooling (8.5 and newer)
+
+Version 8.5 installs NodeJS and pnpm with mise, not with per-CPU download
+blocks. To change a version:
+
+1. Edit the version in `/etc/mise/config.toml`, written in section 6 of the
+   Dockerfile
+2. Run `make build VERSION=8.5` to verify
+
+No SHA256 values are needed, mise checks the downloads.
+
+**Important:** watchexec and Overmind stay as direct downloads on purpose. mise
+installs those through the GitHub API, which allows 60 requests per hour
+without a token, so builds would fail at random.
 
 ## Dockerfile conventions
 
@@ -63,9 +79,14 @@ When updating a tool:
 
 **Cleanup:** Remove archives after extraction; clean backup files from system commands
 
-## Goss tests
+## Image tests
 
-Tests in `docker/<version>/goss.yaml`. Categories: command, file, user/group, package
+Version 8.5 and newer check the image inside the build, in section 8 of the
+Dockerfile. Those checks run in CI on both amd64 and arm64.
+
+Version 8.4 and older use goss files at `docker/<version>/goss.yaml`, which run
+only from `make test` on one machine. Categories: command, file, user/group,
+package.
 
 ```yaml
 command:
