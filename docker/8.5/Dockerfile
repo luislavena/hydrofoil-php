@@ -336,3 +336,36 @@ RUN --mount=type=cache,sharing=private,target=/var/cache/apt \
     composer --version; \
     overmind --version; \
     watchexec --version
+
+# ---
+# 8. Verify the image
+#
+# Version 8.5 ships no goss file. These checks replace it and run on every
+# CPU type that CI builds.
+RUN set -eux; \
+    # PHP extensions
+    php --version; \
+    for ext in bcmath calendar ctype exif fileinfo ftp gd intl json mbstring \
+               memcached openssl pcntl pdo pdo_mysql pdo_pgsql redis sockets \
+               tokenizer xsl zip; do \
+        php -m | grep -qix "$ext" || { echo "missing PHP extension: $ext" >&2; exit 1; }; \
+    done; \
+    php -m | grep -qx "Zend OPcache" || { echo "missing PHP extension: OPcache" >&2; exit 1; }; \
+    php -m | grep -qx "xdebug" || { echo "missing PHP extension: xdebug" >&2; exit 1; }; \
+    # PHP configuration
+    php -i | grep -qE '^memory_limit => 1024M' || { echo "memory_limit is not 1024M" >&2; exit 1; }; \
+    # iconv handles the Euro symbol
+    php -d error_reporting=22527 -d display_errors=1 \
+        -r 'var_dump(iconv("UTF-8", "UTF-8//IGNORE", "This is the Euro symbol €"));' \
+        | grep -q 'string(27)'; \
+    # fixuid is present and setuid root
+    [ "$(stat -c '%a %U %G' /usr/local/bin/fixuid)" = '4755 root root' ]; \
+    [ -f /etc/fixuid/config.yml ]; \
+    # the non-root user exists with the expected ids
+    [ "$(id -u user)" = '1000' ]; \
+    [ "$(id -g user)" = '1000' ]; \
+    # database clients
+    mysql --version; \
+    mysqldump --version; \
+    pg_dump --version; \
+    pg_restore --version
