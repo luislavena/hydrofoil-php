@@ -30,7 +30,7 @@ To be a functional image, it includes the following packages:
 * [NodeJS](https://nodejs.org/en/): the LTS version at the moment that aligned with PHP's release (Eg. v14 for PHP 7.4, v16 for PHP 8.0, etc)
 * [pnpm](https://pnpm.io/): alternate NodeJS package manager (recommended by newer tooling like Vue 3, Vite 4, etc)
 * [Classic Yarn](https://classic.yarnpkg.com/lang/en/): to allow bootstrapping on projects that haven't switched to Yarn 2 (PHP 8.4 and older)
-* [mise](https://mise.jdx.dev/): installs and pins NodeJS and pnpm, and lets you add other tools per project (PHP 8.5 and newer)
+* [mise](https://mise.jdx.dev/): installs and pins NodeJS and pnpm, and lets you add other tools per project (PHP 8.5 and newer). If your project pins a different NodeJS version in its own `mise.toml`, run `mise install` once in the project folder (no sudo needed) to use it
 
 Additionally, it includes the following packages:
 

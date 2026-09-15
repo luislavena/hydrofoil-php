@@ -46,13 +46,16 @@ When updating a tool:
 2. Update SHA256 checksums of that tool
 3. Run `make test VERSION=X.Y` to verify
 
+For NodeJS and pnpm on PHP 8.5 and newer, this does not apply. See
+"NodeJS tooling (8.5 and newer)" below instead.
+
 ## NodeJS tooling (8.5 and newer)
 
 Version 8.5 installs NodeJS and pnpm with mise, not with per-CPU download
 blocks. To change a version:
 
-1. Edit the version in `/etc/mise/config.toml`, written in section 6 of the
-   Dockerfile
+1. Edit the `node = "..."` or `pnpm = "..."` line in section 6 of the
+   Dockerfile, which writes `/etc/mise/config.toml` at build time
 2. Run `make build VERSION=8.5` to verify
 
 No SHA256 values are needed, mise checks the downloads.
