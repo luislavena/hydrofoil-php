@@ -347,7 +347,7 @@ RUN set -eux; \
     php --version; \
     for ext in bcmath calendar ctype exif fileinfo ftp gd intl json mbstring \
                memcached openssl pcntl pdo pdo_mysql pdo_pgsql redis sockets \
-               tokenizer xsl zip; do \
+               tokenizer xml xsl zip; do \
         php -m | grep -qix "$ext" || { echo "missing PHP extension: $ext" >&2; exit 1; }; \
     done; \
     php -m | grep -qx "Zend OPcache" || { echo "missing PHP extension: OPcache" >&2; exit 1; }; \
