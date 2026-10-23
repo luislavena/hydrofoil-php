@@ -4,7 +4,7 @@
     "base_distro": "bullseye"
   },
   "8.3": {
-    "php_full": "8.3.30",
+    "php_full": "8.3.36",
     "base_distro": "bookworm"
   },
   "8.4": {
