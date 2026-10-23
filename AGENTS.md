@@ -5,32 +5,44 @@ Guidance for AI coding agents working in this repository.
 ## Project overview
 
 **Docker image build project** (not a PHP application) that creates development
-container images for PHP. Contains Dockerfiles, goss tests, and CI/CD workflows.
+container images for PHP. Contains Dockerfiles, image tests (Brat and goss),
+and CI/CD workflows.
 
-Technologies: Dockerfile, YAML (goss/GitHub Actions), Makefile, Shell, JSON
+Technologies: Dockerfile, YAML (goss/GitHub Actions), Makefile, Shell (Brat), JSON
 
 ## Repository structure
 
 ```
 .github/
   workflows/ci.yml    # CI pipeline with change detection
+  workflows/image.yml # Build, test and publish one PHP version
   versions.json       # PHP version definitions (source of truth)
 docker/
-  8.1/, 8.2/, 8.3/    # PHP versions (Debian bullseye)
-  8.4/                # PHP 8.4 (Debian trixie) - latest
+  8.1/, 8.2/          # PHP versions (Debian bullseye)
+  8.3/                # PHP 8.3 (Debian bookworm)
+  8.4/, 8.5/          # PHP 8.4 and 8.5 (Debian trixie) - 8.5 is latest
     Dockerfile        # Build definition
-    goss.yaml         # Test specification
+    test/*.brat       # Image tests (8.5 and newer)
+    goss.yaml         # Image tests (8.4 and older only)
+vendor/brat           # Brat test runner (single file, committed)
 Makefile              # Build and test commands
 ```
 
 ## Commands
 
 ```bash
-make build VERSION=8.4    # Build image (default: 8.4)
-make test VERSION=8.4     # Build and test (default: 8.4)
+make build VERSION=8.5    # Build image (default: 8.5)
+make test VERSION=8.5     # Build and test (default: 8.5)
 ```
 
-Manual dgoss test: `GOSS_FILE=docker/8.4/goss.yaml dgoss run ghcr.io/luislavena/hydrofoil-php:8.4 sleep infinity`
+Run one test file or one test (8.5 and newer), against an image you built:
+
+```bash
+IMAGE=ghcr.io/luislavena/hydrofoil-php:8.5 vendor/brat docker/8.5/test/php.brat
+IMAGE=ghcr.io/luislavena/hydrofoil-php:8.5 vendor/brat docker/8.5/test/php.brat:10
+```
+
+Manual dgoss test (8.4 and older): `GOSS_FILE=docker/8.4/goss.yaml dgoss run ghcr.io/luislavena/hydrofoil-php:8.4 sleep infinity`
 
 ## PHP versions configuration
 
@@ -44,6 +56,24 @@ When updating a tool:
 1. Update `TOOL_VERSION` reference in the specific Dockerfile
 2. Update SHA256 checksums of that tool
 3. Run `make test VERSION=X.Y` to verify
+
+For NodeJS and pnpm on PHP 8.5 and newer, this does not apply. See
+"NodeJS tooling (8.5 and newer)" below instead.
+
+## NodeJS tooling (8.5 and newer)
+
+Version 8.5 installs NodeJS and pnpm with mise, not with per-CPU download
+blocks. To change a version:
+
+1. Edit the `node = "..."` or `pnpm = "..."` line in section 6 of the
+   Dockerfile, which writes `/etc/mise/config.toml` at build time
+2. Run `make test VERSION=8.5` to verify
+
+No SHA256 values are needed, mise checks the downloads.
+
+**Important:** watchexec and Overmind stay as direct downloads on purpose. mise
+installs those through the GitHub API, which allows 60 requests per hour
+without a token, so builds would fail at random.
 
 ## Dockerfile conventions
 
@@ -63,9 +93,35 @@ When updating a tool:
 
 **Cleanup:** Remove archives after extraction; clean backup files from system commands
 
-## Goss tests
+## Image tests
 
-Tests in `docker/<version>/goss.yaml`. Categories: command, file, user/group, package
+Version 8.5 and newer use [Brat](https://codeberg.org/sstephenson/brat) tests
+in `docker/<version>/test/*.brat`. The tests run on the host and start the image
+with `docker run`, so they also check the fixuid entrypoint and the non-root
+user. `make test` runs them locally, and CI runs them on amd64 and arm64 before
+it publishes the image.
+
+- Start containers with `in_image` from `test/helper.sh`. It runs as uid 1000,
+  the way a devcontainer starts the image.
+- Write one assertion per line, not loops. On a failure Brat prints the trace
+  up to the failing line, so short lines show the problem at once.
+- Do not put tool versions in tests (only the PHP major and minor), so a tool
+  update only touches the Dockerfile.
+
+```sh
+@test "runs PHP 8.5" {
+  run in_image php --version
+  [ $status -eq 0 ]
+  match "$stdout" '/^PHP 8\.5\./'
+}
+```
+
+To update Brat, replace `vendor/brat` with the bundle of the new version from
+`https://codeberg.org/api/packages/sstephenson/generic/brat/<version>/brat`.
+
+Version 8.4 and older use goss files at `docker/<version>/goss.yaml`, which run
+only from `make test` on one machine. Categories: command, file, user/group,
+package.
 
 ```yaml
 command:
@@ -86,6 +142,20 @@ command:
 
 Pipeline detects changes in `docker/`, builds affected versions with matrix strategy,
 supports amd64/arm64, pushes to GHCR on main. Manual dispatch available.
+
+`ci.yml` calls `image.yml` once per changed version. `image.yml` runs three
+jobs for that version:
+
+1. Build: Depot builds amd64 and arm64 in one go and saves the result in the
+   Depot Registry. Nothing goes to GHCR yet.
+2. Test: one job per CPU type on native runners (`ubuntu-24.04`,
+   `ubuntu-24.04-arm`) pulls the saved image for its CPU type and runs the
+   Brat tests. Versions without a `test/` folder skip this job.
+3. Publish: on `main` only, `depot push` copies the same saved build to GHCR.
+   It does not run when a test fails.
+
+Each version has its own jobs, so a failing test in one version does not stop
+another version from publishing.
 
 ## Contribution policy
 
