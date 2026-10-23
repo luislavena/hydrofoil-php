@@ -34,6 +34,8 @@ jobs:
           filters: |
             docker:
               - 'docker/**'
+            tests:
+              - 'test/**'
 
       - name: Generate build matrix
         id: set-matrix
@@ -48,6 +50,9 @@ jobs:
             else
               CHANGED_DIRS="$INPUT_VERSION"
             fi
+          elif [[ "${{ steps.filter.outputs.tests }}" == "true" ]]; then
+            # Shared tests changed - every version symlinks them, so build all
+            CHANGED_DIRS=$(jq -r 'keys[]' "$VERSIONS_FILE")
           else
             # Automatic trigger - only changed directories
             CHANGED_FILES='${{ steps.filter.outputs.docker_files }}'
