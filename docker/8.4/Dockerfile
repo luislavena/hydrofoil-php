@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1.4
 
-ARG PHP_VERSION=8.4.14
+ARG PHP_VERSION=8.4.27
 ARG BASE_DISTRO=trixie
 
 # ---
