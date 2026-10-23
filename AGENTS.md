@@ -5,9 +5,10 @@ Guidance for AI coding agents working in this repository.
 ## Project overview
 
 **Docker image build project** (not a PHP application) that creates development
-container images for PHP. Contains Dockerfiles, goss tests, and CI/CD workflows.
+container images for PHP. Contains Dockerfiles, image tests (Brat and goss),
+and CI/CD workflows.
 
-Technologies: Dockerfile, YAML (goss/GitHub Actions), Makefile, Shell, JSON
+Technologies: Dockerfile, YAML (goss/GitHub Actions), Makefile, Shell (Brat), JSON
 
 ## Repository structure
 
@@ -20,7 +21,9 @@ docker/
   8.3/                # PHP 8.3 (Debian bookworm)
   8.4/, 8.5/          # PHP 8.4 and 8.5 (Debian trixie) - 8.5 is latest
     Dockerfile        # Build definition
-    goss.yaml         # Test specification (8.4 and older only)
+    test/*.brat       # Image tests (8.5 and newer)
+    goss.yaml         # Image tests (8.4 and older only)
+vendor/brat           # Brat test runner (single file, committed)
 Makefile              # Build and test commands
 ```
 
@@ -29,6 +32,13 @@ Makefile              # Build and test commands
 ```bash
 make build VERSION=8.5    # Build image (default: 8.5)
 make test VERSION=8.5     # Build and test (default: 8.5)
+```
+
+Run one test file or one test (8.5 and newer), against an image you built:
+
+```bash
+IMAGE=ghcr.io/luislavena/hydrofoil-php:8.5 vendor/brat docker/8.5/test/php.brat
+IMAGE=ghcr.io/luislavena/hydrofoil-php:8.5 vendor/brat docker/8.5/test/php.brat:10
 ```
 
 Manual dgoss test (8.4 and older): `GOSS_FILE=docker/8.4/goss.yaml dgoss run ghcr.io/luislavena/hydrofoil-php:8.4 sleep infinity`
@@ -56,7 +66,7 @@ blocks. To change a version:
 
 1. Edit the `node = "..."` or `pnpm = "..."` line in section 6 of the
    Dockerfile, which writes `/etc/mise/config.toml` at build time
-2. Run `make build VERSION=8.5` to verify
+2. Run `make test VERSION=8.5` to verify
 
 No SHA256 values are needed, mise checks the downloads.
 
@@ -84,8 +94,29 @@ without a token, so builds would fail at random.
 
 ## Image tests
 
-Version 8.5 and newer check the image inside the build, in section 8 of the
-Dockerfile. Those checks run in CI on both amd64 and arm64.
+Version 8.5 and newer use [Brat](https://codeberg.org/sstephenson/brat) tests
+in `docker/<version>/test/*.brat`. The tests run on the host and start the image
+with `docker run`, so they also check the fixuid entrypoint and the non-root
+user. `make test` runs them. CI does not run them yet, so section 8 of the
+Dockerfile still checks the image during the build.
+
+- Start containers with `in_image` from `test/helper.sh`. It runs as uid 1000,
+  the way a devcontainer starts the image.
+- Write one assertion per line, not loops. On a failure Brat prints the trace
+  up to the failing line, so short lines show the problem at once.
+- Do not put tool versions in tests (only the PHP major and minor), so a tool
+  update only touches the Dockerfile.
+
+```sh
+@test "runs PHP 8.5" {
+  run in_image php --version
+  [ $status -eq 0 ]
+  match "$stdout" '/^PHP 8\.5\./'
+}
+```
+
+To update Brat, replace `vendor/brat` with the bundle of the new version from
+`https://codeberg.org/api/packages/sstephenson/generic/brat/<version>/brat`.
 
 Version 8.4 and older use goss files at `docker/<version>/goss.yaml`, which run
 only from `make test` on one machine. Categories: command, file, user/group,
