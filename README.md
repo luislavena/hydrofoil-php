@@ -127,6 +127,82 @@ with `working_dir` makes it the working directory for all operations.
 For a complete example on how this is being used, check out the
 [Laravel + Twill][laravel-twill] template repository.
 
+## Troubleshooting
+
+### Xdebug
+
+The image installs Xdebug but does not configure it. It sets no `xdebug.*`
+value and no `XDEBUG_*` variable, so Xdebug uses its default mode, `develop`.
+
+To check the active mode and settings, run:
+
+```console
+$ php -r 'xdebug_info();'
+```
+
+#### Tests do not run or do not show up
+
+Some test tools do not work with the `develop` mode. For example, Pest route
+tests (`spatie/pest-plugin-route-testing`) find no tests (see
+[#50][issue-50]).
+
+Set `XDEBUG_MODE` to `coverage` (or `off` when you do not need coverage) for
+test runs and CI:
+
+```console
+$ XDEBUG_MODE=coverage php artisan test
+```
+
+#### Step debugging with VS Code
+
+Set these values in the primary service of your `docker-compose.yml`:
+
+```yaml
+services:
+  app:
+    environment:
+      XDEBUG_MODE: debug,coverage
+      XDEBUG_TRIGGER: "1"
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+```
+
+Then add this configuration to `.vscode/launch.json`:
+
+```json
+{
+  "name": "Listen for Xdebug on Docker",
+  "type": "php",
+  "request": "launch",
+  "port": 9003,
+  "pathMappings": {
+    "/app": "${workspaceFolder}"
+  }
+}
+```
+
+Some notes about these values:
+
+* `XDEBUG_TRIGGER` starts the debug session. Do not put
+  `start_with_request=yes` in `XDEBUG_CONFIG`, because Xdebug ignores it
+  there.
+* `client_host=host.docker.internal` tells Xdebug to connect to your
+  computer. Without it, Xdebug connects to `localhost`, which is the
+  container. Docker Desktop has this name already, and `extra_hosts` adds it
+  on Linux.
+* `environment` uses the map form, without quotes. In the list form (Eg.
+  `- XDEBUG_CONFIG="client_port=9003"`), the quotes become part of the value
+  and Xdebug reads it wrong.
+
+Note: `XDEBUG_TRIGGER` makes every PHP command (Eg. `composer`) connect to
+the debugger. To debug one command only, remove it from `docker-compose.yml`
+and set it on the command line:
+
+```console
+$ XDEBUG_TRIGGER=1 php artisan test
+```
+
 ## Contribution Policy
 
 This project is open to code contributions for bug fixes only. Features carry
@@ -139,6 +215,7 @@ request or discuss.
 [codespaces]: https://github.com/features/codespaces
 [twill-cms]: https://twill.io
 [new-issue]: https://github.com/luislavena/hydrofoil-php/issues/new
+[issue-50]: https://github.com/luislavena/hydrofoil-php/issues/50
 [docker]: https://docs.docker.com/get-docker/
 [docker-compose]: https://docs.docker.com/compose/
 [docker-compose-yml]: https://docs.docker.com/compose/compose-file/compose-file-v3/
