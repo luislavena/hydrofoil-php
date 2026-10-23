@@ -1,0 +1,16 @@
+#!/bin/sh
+. "$DIR/helper.sh"
+
+# PHP 8.4 and older install NodeJS and Yarn as Debian packages, and pnpm
+# as a static binary. PHP 8.5 and newer use mise instead (see mise.brat).
+
+@test "installs NodeJS, pnpm and Yarn" {
+  [ "$(in_image sh -c 'command -v node')" = /usr/bin/node ]
+  [ "$(in_image sh -c 'command -v npm')" = /usr/bin/npm ]
+  [ "$(in_image sh -c 'command -v pnpm')" = /usr/local/bin/pnpm ]
+  [ "$(in_image sh -c 'command -v yarn')" = /usr/bin/yarn ]
+  in_image node --version
+  in_image npm --version
+  in_image pnpm --version
+  in_image yarn --version
+}
