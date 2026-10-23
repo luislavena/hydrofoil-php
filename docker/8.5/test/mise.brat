@@ -1,0 +1,20 @@
+#!/bin/sh
+. "$DIR/helper.sh"
+
+@test "installs mise in /usr/local/bin" {
+  [ "$(in_image sh -c 'command -v mise')" = /usr/local/bin/mise ]
+  in_image mise --version
+}
+
+@test "runs NodeJS tools through the mise shims" {
+  [ "$(in_image sh -c 'command -v node')" = /usr/local/share/mise/shims/node ]
+  [ "$(in_image sh -c 'command -v npm')" = /usr/local/share/mise/shims/npm ]
+  [ "$(in_image sh -c 'command -v pnpm')" = /usr/local/share/mise/shims/pnpm ]
+  in_image node --version
+  in_image npm --version
+  in_image pnpm --version
+}
+
+@test "ships no Yarn" {
+  [ "$(in_image sh -c 'command -v yarn || echo missing')" = missing ]
+}
