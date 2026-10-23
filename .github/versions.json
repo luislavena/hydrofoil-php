@@ -12,7 +12,7 @@
     "base_distro": "trixie"
   },
   "8.5": {
-    "php_full": "8.5.10",
+    "php_full": "8.5.12",
     "base_distro": "trixie"
   }
 }
