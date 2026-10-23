@@ -15,6 +15,7 @@ Technologies: Dockerfile, YAML (goss/GitHub Actions), Makefile, Shell (Brat), JS
 ```
 .github/
   workflows/ci.yml    # CI pipeline with change detection
+  workflows/image.yml # Build, test and publish one PHP version
   versions.json       # PHP version definitions (source of truth)
 docker/
   8.1/, 8.2/          # PHP versions (Debian bullseye)
@@ -97,8 +98,8 @@ without a token, so builds would fail at random.
 Version 8.5 and newer use [Brat](https://codeberg.org/sstephenson/brat) tests
 in `docker/<version>/test/*.brat`. The tests run on the host and start the image
 with `docker run`, so they also check the fixuid entrypoint and the non-root
-user. `make test` runs them. CI does not run them yet, so section 8 of the
-Dockerfile still checks the image during the build.
+user. `make test` runs them locally, and CI runs them on amd64 and arm64 before
+it publishes the image.
 
 - Start containers with `in_image` from `test/helper.sh`. It runs as uid 1000,
   the way a devcontainer starts the image.
@@ -141,6 +142,20 @@ command:
 
 Pipeline detects changes in `docker/`, builds affected versions with matrix strategy,
 supports amd64/arm64, pushes to GHCR on main. Manual dispatch available.
+
+`ci.yml` calls `image.yml` once per changed version. `image.yml` runs three
+jobs for that version:
+
+1. Build: Depot builds amd64 and arm64 in one go and saves the result in the
+   Depot Registry. Nothing goes to GHCR yet.
+2. Test: one job per CPU type on native runners (`ubuntu-24.04`,
+   `ubuntu-24.04-arm`) pulls the saved image for its CPU type and runs the
+   Brat tests. Versions without a `test/` folder skip this job.
+3. Publish: on `main` only, `depot push` copies the same saved build to GHCR.
+   It does not run when a test fails.
+
+Each version has its own jobs, so a failing test in one version does not stop
+another version from publishing.
 
 ## Contribution policy
 

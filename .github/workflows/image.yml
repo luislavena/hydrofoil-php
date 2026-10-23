@@ -1,0 +1,183 @@
+name: Image
+
+# Builds, tests and publishes the image of one PHP version.
+#
+# Depot builds both CPU types once and saves the result in the Depot
+# Registry. Each test job pulls the image for its own CPU type, and the
+# publish job copies the same saved build to GHCR, so the published image
+# is the one the tests checked.
+
+on:
+  workflow_call:
+    inputs:
+      php_major_minor:
+        type: string
+        required: true
+      php_full:
+        type: string
+        required: true
+      base_distro:
+        type: string
+        required: true
+      has_tests:
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    outputs:
+      build-id: ${{ steps.build.outputs.build-id }}
+      tags: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Define build number
+        run: |
+          echo "HYDROFOIL_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Set up Depot CLI
+        uses: depot/setup-action@v1
+
+      - name: Docker GitHub Registry Login
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker Metadata action
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          flavor: |
+            latest=false
+          images: |
+            ghcr.io/luislavena/hydrofoil-php
+          tags: |
+            type=raw,${{ inputs.php_full }}
+            type=raw,${{ inputs.php_full }}-${{ env.HYDROFOIL_COMMIT }}
+            type=raw,${{ inputs.php_major_minor }}
+
+      - name: Setup Docker BuildKit cache strategy
+        uses: int128/docker-build-cache-config-action@v1
+        id: cache
+        with:
+          image: ghcr.io/${{ github.repository }}/build-cache
+          flavor: prefix=php-${{ inputs.php_major_minor }}--
+
+      - name: Build Docker images
+        id: build
+        uses: depot/build-push-action@v1
+        with:
+          project: ${{ secrets.DEPOT_PROJECT_ID }}
+          token: ${{ secrets.DEPOT_PROJECT_TOKEN }}
+          context: docker/${{ inputs.php_major_minor }}
+          build-args: |
+            PHP_VERSION=${{ inputs.php_full }}
+            BASE_DISTRO=${{ inputs.base_distro }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          save: true
+          cache-from: ${{ steps.cache.outputs.cache-from }}
+          cache-to: ${{ steps.cache.outputs.cache-to }}
+
+  test:
+    name: Test (${{ matrix.arch }})
+    needs: build
+    if: inputs.has_tests
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Depot CLI
+        uses: depot/setup-action@v1
+
+      - name: Pull Docker image
+        uses: depot/pull-action@v1
+        env:
+          DEPOT_PROJECT_ID: ${{ secrets.DEPOT_PROJECT_ID }}
+        with:
+          build-id: ${{ needs.build.outputs.build-id }}
+          token: ${{ secrets.DEPOT_PROJECT_TOKEN }}
+          platform: linux/${{ matrix.arch }}
+          tags: hydrofoil-php:test
+
+      - name: Test Docker image
+        env:
+          IMAGE: hydrofoil-php:test
+        run: |
+          status=0
+          vendor/brat -j 4 docker/${{ inputs.php_major_minor }}/test/*.brat | tee tap.txt || status=$?
+          {
+            echo "### PHP ${{ inputs.php_full }} (${{ matrix.arch }})"
+            echo '```'
+            cat tap.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit $status
+
+  publish:
+    name: Publish
+    needs: [build, test]
+    # Runs when the tests passed, or when this version has no tests
+    if: >-
+      !cancelled()
+      && github.event_name != 'pull_request'
+      && needs.build.result == 'success'
+      && needs.test.result != 'failure'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Set up Depot CLI
+        uses: depot/setup-action@v1
+
+      - name: Docker GitHub Registry Login
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Docker images
+        env:
+          DEPOT_PROJECT_ID: ${{ secrets.DEPOT_PROJECT_ID }}
+          DEPOT_TOKEN: ${{ secrets.DEPOT_PROJECT_TOKEN }}
+          BUILD_ID: ${{ needs.build.outputs.build-id }}
+          TAGS: ${{ needs.build.outputs.tags }}
+        run: |
+          args=()
+          while IFS= read -r tag; do
+            if [ -n "$tag" ]; then
+              args+=(--tag "$tag")
+            fi
+          done <<< "$TAGS"
+          depot push --project "$DEPOT_PROJECT_ID" "${args[@]}" "$BUILD_ID"
