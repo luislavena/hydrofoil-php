@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1.4
 
-ARG PHP_VERSION=8.2.25
-ARG BASE_DISTRO=bullseye
+ARG PHP_VERSION=8.2.35
+ARG BASE_DISTRO=bookworm
 
 # ---
 # 1. Use Debian (${BASE_DISTRO}) version of PHP
