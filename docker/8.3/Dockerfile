@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1
 
-ARG PHP_VERSION=8.3.36
+ARG PHP_VERSION=8.3.37
 ARG BASE_DISTRO=bookworm
 
 # ---
