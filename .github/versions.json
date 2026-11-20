@@ -1,18 +1,18 @@
 {
   "8.2": {
-    "php_full": "8.2.35",
+    "php_full": "8.2.36",
     "base_distro": "bookworm"
   },
   "8.3": {
-    "php_full": "8.3.36",
+    "php_full": "8.3.37",
     "base_distro": "bookworm"
   },
   "8.4": {
-    "php_full": "8.4.27",
+    "php_full": "8.4.28",
     "base_distro": "trixie"
   },
   "8.5": {
-    "php_full": "8.5.12",
+    "php_full": "8.5.13",
     "base_distro": "trixie"
   }
 }
